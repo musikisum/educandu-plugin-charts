@@ -241,18 +241,69 @@ Außerdem die `JIRA_*`-Umgebungsvariablen aus dem `env:`-Block entfernen.
 
 ---
 
-## Schritt 10 — Unnötige Beispiel-Logik in src/ entfernen
+## Schritt 10 — Controller und Server-Zeit-Logik entfernen
 
-Die Beispieldateien enthalten Beispiel-Logik (Server-Zeit, Markdown-Feld), die nicht
-benötigt wird. In folgenden Dateien den Inhalt durch eigene Implementierung ersetzen:
+Das Template enthält einen Beispiel-Controller (Server-Zeit per API) der in den meisten
+Plugins nicht gebraucht wird. Folgendes löschen / bereinigen:
 
-- `src/{plugin}-display.js` — eigene Darstellungskomponente
-- `src/{plugin}-editor.js` — eigener Editor
-- `src/{plugin}-controller.js` — eigener Controller (oder Datei löschen, falls kein Server-Endpunkt nötig)
+**`src/{plugin}-controller.js` löschen:**
+```powershell
+Remove-Item src/{plugin}-controller.js
+```
+
+**`src/{plugin}-info.js`** — `allowsInput = true` entfernen:
+```js
+// Diese Zeile löschen:
+allowsInput = true;
+```
+
+**`src/{plugin}-display.js`** — auf minimale Darstellung reduzieren:
+```js
+import React from 'react';
+import Markdown from '@educandu/educandu/components/markdown.js';
+import { sectionDisplayProps } from '@educandu/educandu/ui/default-prop-types.js';
+
+export default function {Plugin}Display({ content }) {
+  return (
+    <div className="EP_{Namespace}_{Plugin}_Display">
+      <div className={`u-horizontally-centered u-width-${content.width}`}>
+        <Markdown renderAnchors>
+          {content.text}
+        </Markdown>
+      </div>
+    </div>
+  );
+}
+
+{Plugin}Display.propTypes = {
+  ...sectionDisplayProps
+};
+```
+
+**`test-app/src/index.js`** — Controller-Import und -Eintrag entfernen:
+```js
+// Diese Zeile löschen:
+import ChartsController from '../../src/charts-controller.js';
+
+// Und additionalControllers leeren:
+additionalControllers: [],
+```
+
+**`gulpfile.js`** — falls auf Controller verwiesen wird, ebenfalls entfernen.
 
 ---
 
-## Schritt 11 — Schnell-Prüfung vor dem ersten Commit
+## Schritt 11 — Eigene Plugin-Logik implementieren
+
+In folgenden Dateien den Inhalt durch eigene Implementierung ersetzen:
+
+- `src/{plugin}-display.js` — eigene Darstellungskomponente
+- `src/{plugin}-editor.js` — eigener Editor
+- `src/{plugin}.yml` — eigene Übersetzungsschlüssel ergänzen
+
+---
+
+## Schritt 12 — Schnell-Prüfung vor dem ersten Commit
 
 ```powershell
 # Alle verbleibenden "example"-Vorkommen im Code finden:
@@ -264,7 +315,7 @@ grep -ri "educandu/educandu-plugin-example" . --include="*.js" --include="*.json
 
 ---
 
-## Schritt 12 — Ersten Commit erstellen und pushen
+## Schritt 13 — Ersten Commit erstellen und pushen
 
 ```powershell
 git add .
@@ -290,6 +341,10 @@ git push -u origin main
 - [ ] `test-app/src/index.js` — Controller-Pfad, Controller-Variable und plugin-typeName angepasst
 - [ ] `test-app/src/main.less` — `@import url('../../src/example.less')` auf `{plugin}.less` umbiegen
 - [ ] `gulpfile.js` — `createLabelInJiraIssues` entfernt, `release()`-Funktion vereinfacht
+- [ ] `src/{plugin}-controller.js` gelöscht
+- [ ] `src/{plugin}-info.js` — `allowsInput = true` entfernt
+- [ ] `src/{plugin}-display.js` — auf minimale Darstellung ohne Server-Zeit reduziert
+- [ ] `test-app/src/index.js` — Controller-Import und `additionalControllers`-Eintrag entfernt
 - [ ] `.github/workflows/publish.yml` — JIRA-Block entfernt (falls kein JIRA)
 - [ ] `README.md` aktualisiert
 - [ ] Schnell-Prüfung mit grep durchgeführt (keine `example`-Reste)

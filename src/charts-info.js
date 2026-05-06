@@ -11,8 +11,6 @@ class ChartsInfo {
 
   static typeName = 'musikisum/educandu-plugin-charts';
 
-  allowsInput = true;
-
   constructor(gfm) {
     this.gfm = gfm;
   }
