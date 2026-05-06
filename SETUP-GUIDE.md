@@ -27,7 +27,7 @@ Daraus ergeben sich:
 1. Auf GitHub ein neues leeres Repository anlegen:
    - Name: `educandu-plugin-{plugin}` (z.B. `educandu-plugin-charts`)
    - **Kein** README, keine .gitignore, keine Lizenz initialisieren
-2. Die Repository-URL notieren: `https://github.com/{namespace}/educandu-plugin-{plugin}.git`
+2. Die Repository-URL notieren: `git@github.com:{namespace}/educandu-plugin-{plugin}.git`
 
 ---
 
@@ -41,7 +41,7 @@ die alte Git-History löschen und neu initialisieren:
 Remove-Item -Recurse -Force .git
 git init
 git branch -M main
-git remote add origin https://github.com/{namespace}/educandu-plugin-{plugin}.git
+git remote add origin git@github.com:{namespace}/educandu-plugin-{plugin}.git
 ```
 
 ---
@@ -102,20 +102,7 @@ Folgende Stellen ändern:
 | `getDefaultContent`           | Beispiel-Felder                             | Eigene Content-Felder                             |
 | `validateContent`             | Joi-Schema für Beispielfelder               | Joi-Schema für eigene Felder                      |
 
-### 4.4 `src/translations.json`
-
-```json
-{
-  "{namespace}/educandu-plugin-{plugin}": {
-    "name": {
-      "en": "My Plugin Name",
-      "de": "Mein Plugin-Name"
-    }
-  }
-}
-```
-
-### 4.5 `src/{plugin}.yml`
+### 4.4 `src/{plugin}.yml`
 
 ```yaml
 {namespace}/educandu-plugin-{plugin}:
@@ -124,15 +111,15 @@ Folgende Stellen ändern:
     de: Mein Plugin-Name
 ```
 
-> **Hinweis:** `src/translations.json` wird automatisch vom Build-Prozess aus der `.yml`-Datei generiert
-> und muss nicht manuell bearbeitet werden.
+> **Hinweis:** `src/translations.json` wird automatisch vom Build-Prozess aus der `.yml`-Datei
+> generiert und muss nicht manuell bearbeitet werden.
 
-### 4.6 `src/{plugin}-display.js` und `src/{plugin}-editor.js`
+### 4.5 `src/{plugin}-display.js` und `src/{plugin}-editor.js`
 
 - Alle Importe von `./example-*` auf `./{plugin}-*` umstellen.
 - CSS-Klassennamen vom Schema `EP_Educandu_Example_*` auf `EP_{Namespace}_{Plugin}_*` umbenennen.
 
-### 4.7 `src/{plugin}.less`
+### 4.6 `src/{plugin}.less`
 
 - Alle CSS-Selektoren mit altem Präfix `EP_Educandu_Example_` auf neuen Präfix ändern.
 
@@ -143,13 +130,13 @@ Folgende Stellen ändern:
 ### `test-app/src/custom-resolvers.js`
 
 ```js
-import ChartsInfo from '../../src/index.js';  // war: ExampleInfo
+import {Plugin}Info from '../../src/index.js';  // war: ExampleInfo
 
 export default {
   resolveCustomPageTemplate: null,
   resolveCustomHomePageTemplate: null,
   resolveCustomSiteLogo: null,
-  resolveCustomPluginInfos: () => [ChartsInfo]  // war: [ExampleInfo]
+  resolveCustomPluginInfos: () => [{Plugin}Info]  // war: [ExampleInfo]
 };
 ```
 
@@ -158,13 +145,20 @@ export default {
 Drei Stellen ändern:
 
 ```js
-// Import-Zeile:
-import ChartsController from '../../src/charts-controller.js';  // war: example-controller.js
+// Import-Zeile (wird in Schritt 10 ganz entfernt, wenn kein Controller benötigt):
+import {Plugin}Controller from '../../src/{plugin}-controller.js';  // war: example-controller.js
 
 // In der config:
 plugins: ['markdown', 'image', '{namespace}/educandu-plugin-{plugin}'],  // war: educandu/educandu-plugin-example
 
-additionalControllers: [ChartsController],  // war: [ExampleController]
+additionalControllers: [{Plugin}Controller],  // war: [ExampleController]
+```
+
+### `test-app/src/main.less`
+
+```less
+// war: @import url('../../src/example.less');
+@import url('../../src/{plugin}.less');
 ```
 
 ---
@@ -180,7 +174,7 @@ import {
   cliArgs,
   compressFiles,
   createGithubRelease,
-  createReleaseNotesFromCurrentTag,   // <-- jiraProjectKeys-Parameter weglassen
+  createReleaseNotesFromCurrentTag,
   ensureIsValidSemverTag,
   // ... rest bleibt gleich, kein createLabelInJiraIssues mehr
 } from '@educandu/dev-tools';
@@ -203,36 +197,73 @@ export async function release() {
 
 ---
 
-## Schritt 8 — GitHub Actions anpassen
+## Schritt 7 — NPM-Publishing einrichten
+
+Das Template ist auf den `@educandu`-Scope eingestellt und enthält keine Authentifizierung
+für fremde npm-Accounts. Zwei Dateien anpassen, dann einmalig einen Token anlegen.
+
+### `.npmrc`
+
+```
+scope=@{namespace}
+access=public
+```
 
 ### `.github/workflows/publish.yml`
 
-Den JIRA-Block entfernen, wenn kein JIRA-Projekt vorhanden ist:
+Im `setup-node`-Schritt `registry-url` ergänzen und beim `npm publish`-Schritt den
+Token als Umgebungsvariable setzen:
 
 ```yaml
-# Diesen Block löschen oder vereinfachen:
+- name: Install node
+  uses: actions/setup-node@v6.0.0
+  with:
+    node-version: "20.17.0"
+    cache: "yarn"
+    registry-url: "https://registry.npmjs.org"   # <-- neu
+
+# ...
+
+- name: Publish to npm
+  run: npm publish
+  env:
+    NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}       # <-- neu
+```
+
+Außerdem den JIRA-Block entfernen und `env:` auf das Minimum kürzen:
+
+```yaml
+# Diesen Block löschen:
 - name: Create Github release and tag JIRA issues
   run: |
     ./node_modules/.bin/gulp release \
       --github-token ${{secrets.GITHUB_TOKEN}} \
-      --jira-base-url ${{env.JIRA_BASE_URL}} \
-      --jira-project-keys ${{env.JIRA_PROJECT_KEYS}} \
-      --jira-user ${{secrets.JIRA_USER}} \
-      --jira-api-key ${{secrets.JIRA_API_KEY}}
-```
+      --jira-base-url ${{env.JIRA_BASE_URL}} ...
 
-Ersetzen durch (nur GitHub Release, kein JIRA):
-
-```yaml
+# Ersetzen durch:
 - name: Create Github release
   run: ./node_modules/.bin/gulp release --github-token ${{secrets.GITHUB_TOKEN}}
 ```
 
-Außerdem die `JIRA_*`-Umgebungsvariablen aus dem `env:`-Block entfernen.
+### Einmalig: npm Access Token anlegen und als GitHub Secret hinterlegen
+
+1. **npmjs.org** → Avatar → Access Tokens → Generate New Token → **Granular Access Token**
+   - Scope: `@{namespace}`
+   - Permission: Read and write
+2. **GitHub Repo** → Settings → Secrets and variables → Actions → **New repository secret**
+   - Name: `NPM_TOKEN`
+   - Value: der eben erstellte Token
+
+Danach genügt ein Tag-Push zum Publishen:
+
+```powershell
+git tag v0.1.0
+git push origin v0.1.0
+```
 
 ---
 
-## Schritt 9 — README.md aktualisieren
+## Schritt 8 — README.md aktualisieren
 
 - Alle `educandu-plugin-example` durch `educandu-plugin-{plugin}` ersetzen.
 - Alle `@educandu/educandu-plugin-example` durch `@{namespace}/educandu-plugin-{plugin}` ersetzen.
@@ -241,9 +272,9 @@ Außerdem die `JIRA_*`-Umgebungsvariablen aus dem `env:`-Block entfernen.
 
 ---
 
-## Schritt 10 — Controller und Server-Zeit-Logik entfernen
+## Schritt 9 — Controller und Server-Zeit-Logik entfernen
 
-Das Template enthält einen Beispiel-Controller (Server-Zeit per API) der in den meisten
+Das Template enthält einen Beispiel-Controller (Server-Zeit per API), der in den meisten
 Plugins nicht gebraucht wird. Folgendes löschen / bereinigen:
 
 **`src/{plugin}-controller.js` löschen:**
@@ -283,17 +314,15 @@ export default function {Plugin}Display({ content }) {
 **`test-app/src/index.js`** — Controller-Import und -Eintrag entfernen:
 ```js
 // Diese Zeile löschen:
-import ChartsController from '../../src/charts-controller.js';
+import {Plugin}Controller from '../../src/{plugin}-controller.js';
 
 // Und additionalControllers leeren:
 additionalControllers: [],
 ```
 
-**`gulpfile.js`** — falls auf Controller verwiesen wird, ebenfalls entfernen.
-
 ---
 
-## Schritt 11 — Eigene Plugin-Logik implementieren
+## Schritt 10 — Eigene Plugin-Logik implementieren
 
 In folgenden Dateien den Inhalt durch eigene Implementierung ersetzen:
 
@@ -303,19 +332,18 @@ In folgenden Dateien den Inhalt durch eigene Implementierung ersetzen:
 
 ---
 
-## Schritt 12 — Schnell-Prüfung vor dem ersten Commit
+## Schritt 11 — Schnell-Prüfung vor dem ersten Commit
 
 ```powershell
-# Alle verbleibenden "example"-Vorkommen im Code finden:
-grep -ri "example" src/ --include="*.js" --include="*.json" --include="*.yml" --include="*.less"
-
-# Alle verbleibenden Referenzen auf educandu-Namespace prüfen:
-grep -ri "educandu/educandu-plugin-example" . --include="*.js" --include="*.json" --include="*.yml" --include="*.md"
+# Alle verbleibenden "example"-Vorkommen im Code finden (PowerShell):
+Select-String -Path "src\*", "test-app\src\*", "gulpfile.js", "package.json" `
+  -Pattern "example|ExampleInfo|ExampleController|ServerTime|EP_Educandu" -SimpleMatch |
+  Select-Object Filename, LineNumber, Line
 ```
 
 ---
 
-## Schritt 13 — Ersten Commit erstellen und pushen
+## Schritt 12 — Ersten Commit erstellen und pushen
 
 ```powershell
 git add .
@@ -330,22 +358,24 @@ git push -u origin main
 - [ ] GitHub-Repo angelegt (leer, ohne initialen Commit)
 - [ ] `.git`-Ordner gelöscht, neu initialisiert, Remote gesetzt
 - [ ] Alle `src/example-*` Dateien umbenannt
-- [ ] `package.json` — name, description, homepage, repository angepasst
+- [ ] `package.json` — name, description, author, homepage, repository angepasst
 - [ ] `src/index.js` — Import-Pfad angepasst
 - [ ] `src/{plugin}-info.js` — typeName, Klassen-Name, getDisplayName, Icon, Content-Schema angepasst
-- [ ] `src/translations.json` — Namespace-Schlüssel angepasst
 - [ ] `src/{plugin}.yml` — Namespace-Schlüssel angepasst
 - [ ] `src/{plugin}-display.js` / `src/{plugin}-editor.js` — Importe und CSS-Klassen angepasst
 - [ ] `src/{plugin}.less` — CSS-Präfix angepasst
 - [ ] `test-app/src/custom-resolvers.js` — `ExampleInfo` durch `{Plugin}Info` ersetzt
 - [ ] `test-app/src/index.js` — Controller-Pfad, Controller-Variable und plugin-typeName angepasst
-- [ ] `test-app/src/main.less` — `@import url('../../src/example.less')` auf `{plugin}.less` umbiegen
+- [ ] `test-app/src/main.less` — `example.less` auf `{plugin}.less` umgebogen
 - [ ] `gulpfile.js` — `createLabelInJiraIssues` entfernt, `release()`-Funktion vereinfacht
+- [ ] `.npmrc` — `scope=@{namespace}` gesetzt
+- [ ] `.github/workflows/publish.yml` — `registry-url` + `NODE_AUTH_TOKEN` ergänzt, JIRA-Block entfernt
+- [ ] npm Access Token auf npmjs.org erstellt
+- [ ] GitHub Secret `NPM_TOKEN` im Repo hinterlegt
 - [ ] `src/{plugin}-controller.js` gelöscht
 - [ ] `src/{plugin}-info.js` — `allowsInput = true` entfernt
-- [ ] `src/{plugin}-display.js` — auf minimale Darstellung ohne Server-Zeit reduziert
-- [ ] `test-app/src/index.js` — Controller-Import und `additionalControllers`-Eintrag entfernt
-- [ ] `.github/workflows/publish.yml` — JIRA-Block entfernt (falls kein JIRA)
+- [ ] `src/{plugin}-display.js` — auf minimale Darstellung reduziert
+- [ ] `test-app/src/index.js` — Controller-Import und `additionalControllers` entfernt
 - [ ] `README.md` aktualisiert
-- [ ] Schnell-Prüfung mit grep durchgeführt (keine `example`-Reste)
+- [ ] Schnell-Prüfung durchgeführt (keine `example`-Reste)
 - [ ] Initialer Commit erstellt und gepusht
