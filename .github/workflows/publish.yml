@@ -21,6 +21,7 @@ jobs:
         with:
           node-version: "20.17.0"
           cache: "yarn"
+          registry-url: "https://registry.npmjs.org"
       - name: Update npm
         run: npm install -g npm@11.6.2
       - name: Install node modules
@@ -36,5 +37,7 @@ jobs:
         run: ./node_modules/.bin/gulp build
       - name: Publish to npm
         run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
       - name: Create Github release
         run: ./node_modules/.bin/gulp release --github-token ${{secrets.GITHUB_TOKEN}}
