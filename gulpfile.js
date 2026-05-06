@@ -5,7 +5,6 @@ import {
   cliArgs,
   compressFiles,
   createGithubRelease,
-  createLabelInJiraIssues,
   createReleaseNotesFromCurrentTag,
   ensureIsValidSemverTag,
   esbuild,
@@ -209,24 +208,13 @@ export function verifySemverTag(done) {
 }
 
 export async function release() {
-  const { currentTag, releaseNotes, jiraIssueKeys } = await createReleaseNotesFromCurrentTag({
-    jiraBaseUrl: cliArgs.jiraBaseUrl,
-    jiraProjectKeys: cliArgs.jiraProjectKeys.split(',')
-  });
+  const { currentTag, releaseNotes } = await createReleaseNotesFromCurrentTag({});
 
   await createGithubRelease({
     githubToken: cliArgs.githubToken,
     currentTag,
     releaseNotes,
     files: []
-  });
-
-  await createLabelInJiraIssues({
-    jiraBaseUrl: cliArgs.jiraBaseUrl,
-    jiraUser: cliArgs.jiraUser,
-    jiraApiKey: cliArgs.jiraApiKey,
-    jiraIssueKeys,
-    label: currentTag
   });
 }
 

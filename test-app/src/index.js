@@ -4,7 +4,7 @@ import path from 'node:path';
 import parseBool from 'parseboolean';
 import educandu from '@educandu/educandu';
 import customResolvers from './custom-resolvers.js';
-import ExampleController from '../../src/example-controller.js';
+import ChartsController from '../../src/charts-controller.js';
 
 const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
 
@@ -36,7 +36,7 @@ const config = {
     styles: (await glob(`main-${'[A-Z0-9]'.repeat(8)}.css`, { cwd: path.resolve(thisDir, '../dist') })).map(x => `/${x}`)
   },
   resources: [path.resolve(thisDir, '../../src/translations.json')],
-  additionalControllers: [ExampleController],
+  additionalControllers: [ChartsController],
   sessionSecret: process.env.TEST_APP_SESSION_SECRET,
   sessionCookieDomain: process.env.TEST_APP_SESSION_COOKIE_DOMAIN,
   sessionCookieName: process.env.TEST_APP_SESSION_COOKIE_NAME,
@@ -50,7 +50,7 @@ const config = {
   emailSenderAddress: process.env.TEST_APP_EMAIL_SENDER_ADDRESS,
   adminEmailAddress: process.env.TEST_APP_ADMIN_EMAIL_ADDRESS,
   initialUser: JSON.parse(process.env.TEST_APP_INITIAL_USER),
-  plugins: ['markdown', 'image', 'educandu/educandu-plugin-example'],
+  plugins: ['markdown', 'image', 'musikisum/educandu-plugin-charts'],
   exposeErrorDetails: true
 };
 
