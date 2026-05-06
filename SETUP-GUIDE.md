@@ -138,7 +138,72 @@ Folgende Stellen ändern:
 
 ---
 
-## Schritt 5 — GitHub Actions anpassen
+## Schritt 5 — test-app anpassen
+
+### `test-app/src/custom-resolvers.js`
+
+```js
+import ChartsInfo from '../../src/index.js';  // war: ExampleInfo
+
+export default {
+  resolveCustomPageTemplate: null,
+  resolveCustomHomePageTemplate: null,
+  resolveCustomSiteLogo: null,
+  resolveCustomPluginInfos: () => [ChartsInfo]  // war: [ExampleInfo]
+};
+```
+
+### `test-app/src/index.js`
+
+Drei Stellen ändern:
+
+```js
+// Import-Zeile:
+import ChartsController from '../../src/charts-controller.js';  // war: example-controller.js
+
+// In der config:
+plugins: ['markdown', 'image', '{namespace}/educandu-plugin-{plugin}'],  // war: educandu/educandu-plugin-example
+
+additionalControllers: [ChartsController],  // war: [ExampleController]
+```
+
+---
+
+## Schritt 6 — gulpfile.js bereinigen
+
+Die `release()`-Funktion und die Import-Liste enthalten JIRA-Code, der ohne JIRA-Credentials abstürzt.
+
+**Import-Zeile** — `createLabelInJiraIssues` entfernen:
+
+```js
+import {
+  cliArgs,
+  compressFiles,
+  createGithubRelease,
+  createReleaseNotesFromCurrentTag,   // <-- jiraProjectKeys-Parameter weglassen
+  ensureIsValidSemverTag,
+  // ... rest bleibt gleich, kein createLabelInJiraIssues mehr
+} from '@educandu/dev-tools';
+```
+
+**`release()`-Funktion** vereinfachen:
+
+```js
+export async function release() {
+  const { currentTag, releaseNotes } = await createReleaseNotesFromCurrentTag({});
+
+  await createGithubRelease({
+    githubToken: cliArgs.githubToken,
+    currentTag,
+    releaseNotes,
+    files: []
+  });
+}
+```
+
+---
+
+## Schritt 8 — GitHub Actions anpassen
 
 ### `.github/workflows/publish.yml`
 
@@ -167,7 +232,7 @@ Außerdem die `JIRA_*`-Umgebungsvariablen aus dem `env:`-Block entfernen.
 
 ---
 
-## Schritt 6 — README.md aktualisieren
+## Schritt 9 — README.md aktualisieren
 
 - Alle `educandu-plugin-example` durch `educandu-plugin-{plugin}` ersetzen.
 - Alle `@educandu/educandu-plugin-example` durch `@{namespace}/educandu-plugin-{plugin}` ersetzen.
@@ -176,7 +241,7 @@ Außerdem die `JIRA_*`-Umgebungsvariablen aus dem `env:`-Block entfernen.
 
 ---
 
-## Schritt 7 — Unnötige Beispiel-Logik in src/ entfernen
+## Schritt 10 — Unnötige Beispiel-Logik in src/ entfernen
 
 Die Beispieldateien enthalten Beispiel-Logik (Server-Zeit, Markdown-Feld), die nicht
 benötigt wird. In folgenden Dateien den Inhalt durch eigene Implementierung ersetzen:
@@ -187,7 +252,7 @@ benötigt wird. In folgenden Dateien den Inhalt durch eigene Implementierung ers
 
 ---
 
-## Schritt 8 — Schnell-Prüfung vor dem ersten Commit
+## Schritt 11 — Schnell-Prüfung vor dem ersten Commit
 
 ```powershell
 # Alle verbleibenden "example"-Vorkommen im Code finden:
@@ -199,7 +264,7 @@ grep -ri "educandu/educandu-plugin-example" . --include="*.js" --include="*.json
 
 ---
 
-## Schritt 9 — Ersten Commit erstellen und pushen
+## Schritt 12 — Ersten Commit erstellen und pushen
 
 ```powershell
 git add .
@@ -221,6 +286,9 @@ git push -u origin main
 - [ ] `src/{plugin}.yml` — Namespace-Schlüssel angepasst
 - [ ] `src/{plugin}-display.js` / `src/{plugin}-editor.js` — Importe und CSS-Klassen angepasst
 - [ ] `src/{plugin}.less` — CSS-Präfix angepasst
+- [ ] `test-app/src/custom-resolvers.js` — `ExampleInfo` durch `{Plugin}Info` ersetzt
+- [ ] `test-app/src/index.js` — Controller-Pfad, Controller-Variable und plugin-typeName angepasst
+- [ ] `gulpfile.js` — `createLabelInJiraIssues` entfernt, `release()`-Funktion vereinfacht
 - [ ] `.github/workflows/publish.yml` — JIRA-Block entfernt (falls kein JIRA)
 - [ ] `README.md` aktualisiert
 - [ ] Schnell-Prüfung mit grep durchgeführt (keine `example`-Reste)
