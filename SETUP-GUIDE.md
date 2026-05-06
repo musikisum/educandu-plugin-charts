@@ -263,7 +263,31 @@ git push origin v0.1.0
 
 ---
 
-## Schritt 8 — README.md aktualisieren
+## Schritt 8 — Wartungshinweise für GitHub Actions
+
+Die Workflow-Dateien verwenden gepinnte Versionen (z.B. `actions/checkout@v4.2.1`).
+Gelegentlich sollte man diese aktualisieren — aber mit Vorsicht:
+
+**Was sicher ist:**
+- Die Action-Version selbst erhöhen (z.B. `v4.2.1` → `v4.2.2`) — das sind meist nur Bugfixes
+
+**Was breaking changes verursachen kann und deshalb NICHT gleichzeitig geändert werden darf:**
+- `node-version` — eine neue Node-Version kann Inkompatibilitäten mit installierten Paketen erzeugen
+- `yarn.lock` — darf nie ohne gründlichen Test neu generiert werden; das Flag `--frozen-lockfile` in den CI-Skripten verhindert ungewollte Änderungen; niemals `yarn upgrade` ohne bewusste Entscheidung ausführen
+
+**Empfohlenes Vorgehen bei Action-Updates:**
+1. Nur die Versionsnummer der Action ändern, nichts sonst
+2. Den Branch pushen und die CI-Pipeline beobachten
+3. Erst wenn verify + publish grün sind, mergen
+
+Um die aktuell verfügbaren Versionen zu prüfen:
+- `actions/checkout` → https://github.com/actions/checkout/releases
+- `actions/setup-node` → https://github.com/actions/setup-node/releases
+- `codecov/codecov-action` → https://github.com/codecov/codecov-action/releases
+
+---
+
+## Schritt 10 — README.md aktualisieren
 
 - Alle `educandu-plugin-example` durch `educandu-plugin-{plugin}` ersetzen.
 - Alle `@educandu/educandu-plugin-example` durch `@{namespace}/educandu-plugin-{plugin}` ersetzen.
@@ -272,7 +296,7 @@ git push origin v0.1.0
 
 ---
 
-## Schritt 9 — Controller und Server-Zeit-Logik entfernen
+## Schritt 11 — Controller und Server-Zeit-Logik entfernen
 
 Das Template enthält einen Beispiel-Controller (Server-Zeit per API), der in den meisten
 Plugins nicht gebraucht wird. Folgendes löschen / bereinigen:
@@ -322,7 +346,7 @@ additionalControllers: [],
 
 ---
 
-## Schritt 10 — Eigene Plugin-Logik implementieren
+## Schritt 12 — Eigene Plugin-Logik implementieren
 
 In folgenden Dateien den Inhalt durch eigene Implementierung ersetzen:
 
@@ -332,7 +356,7 @@ In folgenden Dateien den Inhalt durch eigene Implementierung ersetzen:
 
 ---
 
-## Schritt 11 — Schnell-Prüfung vor dem ersten Commit
+## Schritt 13 — Schnell-Prüfung vor dem ersten Commit
 
 ```powershell
 # Alle verbleibenden "example"-Vorkommen im Code finden (PowerShell):
@@ -343,7 +367,7 @@ Select-String -Path "src\*", "test-app\src\*", "gulpfile.js", "package.json" `
 
 ---
 
-## Schritt 12 — Ersten Commit erstellen und pushen
+## Schritt 14 — Ersten Commit erstellen und pushen
 
 ```powershell
 git add .
