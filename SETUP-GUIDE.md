@@ -288,6 +288,7 @@ git push -u origin main
 - [ ] `src/{plugin}.less` — CSS-Präfix angepasst
 - [ ] `test-app/src/custom-resolvers.js` — `ExampleInfo` durch `{Plugin}Info` ersetzt
 - [ ] `test-app/src/index.js` — Controller-Pfad, Controller-Variable und plugin-typeName angepasst
+- [ ] `test-app/src/main.less` — `@import url('../../src/example.less')` auf `{plugin}.less` umbiegen
 - [ ] `gulpfile.js` — `createLabelInJiraIssues` entfernt, `release()`-Funktion vereinfacht
 - [ ] `.github/workflows/publish.yml` — JIRA-Block entfernt (falls kein JIRA)
 - [ ] `README.md` aktualisiert
