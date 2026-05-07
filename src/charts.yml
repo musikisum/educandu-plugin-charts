@@ -1,10 +1,73 @@
 musikisum/educandu-plugin-charts:
   name:
-    en: Example plugin
-    de: Beispiel-Plugin
-  label:
-    en: Example label
-    de: Beispiel-Label
-  currentServerTime:
-    en: Current server time
-    de: Aktuelle Serverzeit
+    en: Charts
+    de: Diagramme
+  chartType:
+    en: Chart type
+    de: Diagramm-Typ
+  chartTypeBar:
+    en: Bar (vertical)
+    de: Balken (vertikal)
+  chartTypeBarHorizontal:
+    en: Bar (horizontal)
+    de: Balken (horizontal)
+  chartTypeLine:
+    en: Line
+    de: Linie
+  chartTypePie:
+    en: Pie
+    de: Kreis
+  chartTypeDoughnut:
+    en: Doughnut
+    de: Donut
+  chartTypeRadar:
+    en: Radar
+    de: Netzdiagramm
+  chartTypePolarArea:
+    en: Polar area
+    de: Polarfläche
+  valueAxis:
+    en: Value axis
+    de: Werteachse
+  min:
+    en: Min
+    de: Min
+  max:
+    en: Max
+    de: Max
+  auto:
+    en: Auto
+    de: Auto
+  dataRange:
+    en: "Data: {min} – {max}"
+    de: "Daten: {min} – {max}"
+  axisRangeError:
+    en: Min must be less than Max
+    de: Min muss kleiner als Max sein
+  dataFile:
+    en: Data file
+    de: Datei
+  chooseFile:
+    en: Choose file (.xlsx, .ods, .csv)
+    de: Datei wählen (.xlsx, .ods, .csv)
+  uploadSuccess:
+    en: "{fileName} — {labelCount} labels, {datasetCount} datasets loaded"
+    de: "{fileName} — {labelCount} Labels, {datasetCount} Datensätze geladen"
+  parseErrorTooFewRows:
+    en: The file must contain at least one header row and one data row.
+    de: Die Datei muss mindestens eine Kopfzeile und eine Datenzeile enthalten.
+  parseErrorTooFewColumns:
+    en: The file must contain at least one label column and one data column.
+    de: Die Datei muss mindestens eine Label-Spalte und eine Datenspalte enthalten.
+  parseErrorNoData:
+    en: The file contains no usable data.
+    de: Die Datei enthält keine verwertbaren Daten.
+  parseWarningTextCells:
+    en: Some data cells contain text instead of numbers and were treated as 0.
+    de: Einige Datenzellen enthalten Text statt Zahlen und wurden als 0 gewertet.
+  parseWarningEmptyCells:
+    en: Some data cells are empty and were treated as 0.
+    de: Einige Datenzellen sind leer und wurden als 0 gewertet.
+  noData:
+    en: No data loaded yet. Please upload a file in the editor.
+    de: Noch keine Daten geladen. Bitte im Editor eine Datei hochladen.

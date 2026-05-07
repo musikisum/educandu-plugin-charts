@@ -1,26 +1,32 @@
 import joi from 'joi';
 import React from 'react';
-import { ClockCircleOutlined } from '@ant-design/icons';
+import { BarChartOutlined } from '@ant-design/icons';
 import cloneDeep from '@educandu/educandu/utils/clone-deep.js';
 import { PLUGIN_GROUP } from '@educandu/educandu/domain/constants.js';
-import { couldAccessUrlFromRoom } from '@educandu/educandu/utils/source-utils.js';
-import GithubFlavoredMarkdown from '@educandu/educandu/common/github-flavored-markdown.js';
+
+export const CHART_TYPE = {
+  bar: 'bar',
+  barHorizontal: 'barHorizontal',
+  line: 'line',
+  pie: 'pie',
+  doughnut: 'doughnut',
+  radar: 'radar',
+  polarArea: 'polarArea'
+};
+
+export const AXIS_CHART_TYPES = new Set([
+  'bar', 'barHorizontal', 'line', 'radar', 'polarArea'
+]);
 
 class ChartsInfo {
-  static dependencies = [GithubFlavoredMarkdown];
-
   static typeName = 'musikisum/educandu-plugin-charts';
-
-  constructor(gfm) {
-    this.gfm = gfm;
-  }
 
   getDisplayName(t) {
     return t('musikisum/educandu-plugin-charts:name');
   }
 
   getIcon() {
-    return <ClockCircleOutlined />;
+    return <BarChartOutlined />;
   }
 
   getGroups() {
@@ -37,15 +43,35 @@ class ChartsInfo {
 
   getDefaultContent() {
     return {
-      text: '',
-      width: 100
+      mode: 'chart',
+      chartType: CHART_TYPE.bar,
+      axisMin: null,
+      axisMax: null,
+      chartData: {
+        labels: [],
+        datasets: []
+      }
     };
   }
 
   validateContent(content) {
     const schema = joi.object({
-      text: joi.string().allow('').required(),
-      width: joi.number().min(0).max(100).required()
+      mode: joi.string().valid('chart').required(),
+      chartType: joi.string().valid(...Object.values(CHART_TYPE)).required(),
+      axisMin: joi.number().allow(null).optional(),
+      axisMax: joi.number().allow(null).optional(),
+      chartData: joi.object({
+        labels: joi.array().items(joi.string().allow('')).required(),
+        datasets: joi.array().items(joi.object({
+          label: joi.string().allow('').required(),
+          data: joi.array().items(joi.number()).required()
+        })).required()
+      }).required()
+    }).custom((value, helpers) => {
+      if (value.axisMin !== null && value.axisMax !== null && value.axisMin >= value.axisMax) {
+        return helpers.error('any.invalid');
+      }
+      return value;
     });
 
     joi.attempt(content, schema, { abortEarly: false, convert: false, noDefaults: true });
@@ -55,19 +81,12 @@ class ChartsInfo {
     return cloneDeep(content);
   }
 
-  redactContent(content, targetRoomId) {
-    const redactedContent = cloneDeep(content);
-
-    redactedContent.text = this.gfm.redactCdnResources(
-      redactedContent.text,
-      url => couldAccessUrlFromRoom(url, targetRoomId) ? url : ''
-    );
-
-    return redactedContent;
+  redactContent(content) {
+    return cloneDeep(content);
   }
 
-  getCdnResources(content) {
-    return this.gfm.extractCdnResources(content.text);
+  getCdnResources() {
+    return [];
   }
 }
 
