@@ -1,6 +1,11 @@
 import * as XLSX from 'xlsx';
 import { describe, expect, it } from 'vitest';
-import { collectLatestVotes, getDataRange, parseChartWorkbook, parseVotingText } from './charts-utils.js';
+import {
+  collectLatestVotes,
+  getDataRange,
+  parseChartWorkbook,
+  parseVotingText
+} from './charts-utils.js';
 
 function makeWorkbook(data) {
   const ws = XLSX.utils.aoa_to_sheet(data);
@@ -99,7 +104,7 @@ describe('collectLatestVotes', () => {
 
   it('ignores inputs without matching votingId', () => {
     const inputs = [
-      { createdBy: { _id: 'u1' }, sections: { s1: { data: { other_id: { q1: 'o1' } } } } }
+      { createdBy: { _id: 'u1' }, sections: { s1: { data: { otherId: { q1: 'o1' } } } } }
     ];
     const votes = collectLatestVotes(inputs, 'vid1');
     expect(votes).toHaveLength(0);

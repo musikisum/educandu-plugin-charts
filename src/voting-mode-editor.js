@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
-import { Alert, Button, Form, Input, InputNumber, Radio, Space, Upload } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
-import Info from '@educandu/educandu/components/info.js';
-import ObjectWidthSlider from '@educandu/educandu/components/object-width-slider.js';
-import { useService } from '@educandu/educandu/components/container-context.js';
-import DocumentInputApiClient from '@educandu/educandu/api-clients/document-input-api-client.js';
-import { FORM_ITEM_LAYOUT } from '@educandu/educandu/domain/constants.js';
-import { sectionEditorProps } from '@educandu/educandu/ui/default-prop-types.js';
-import uniqueId from '@educandu/educandu/utils/unique-id.js';
 import { BEHAVIOR } from './charts-info.js';
-import { parseVotingWorkbook, parseVotingText, readFile, collectLatestVotes, MAX_UPLOAD_BYTES } from './charts-utils.js';
+import { useTranslation } from 'react-i18next';
+import { UploadOutlined } from '@ant-design/icons';
+import Info from '@educandu/educandu/components/info.js';
+import uniqueId from '@educandu/educandu/utils/unique-id.js';
+import { FORM_ITEM_LAYOUT } from '@educandu/educandu/domain/constants.js';
+import { useService } from '@educandu/educandu/components/container-context.js';
+import { sectionEditorProps } from '@educandu/educandu/ui/default-prop-types.js';
+import { Alert, Button, Form, Input, InputNumber, Radio, Space, Upload } from 'antd';
+import ObjectWidthSlider from '@educandu/educandu/components/object-width-slider.js';
+import DocumentInputApiClient from '@educandu/educandu/api-clients/document-input-api-client.js';
+import {
+  parseVotingWorkbook,
+  parseVotingText,
+  readFile,
+  collectLatestVotes,
+  MAX_UPLOAD_BYTES
+} from './charts-utils.js';
 
 export default function VotingModeEditor({ content, context, onContentChanged }) {
   const { t } = useTranslation('musikisum/educandu-plugin-charts');
@@ -147,9 +153,10 @@ export default function VotingModeEditor({ content, context, onContentChanged })
           <Upload accept=".xlsx,.xls,.ods,.csv,.txt" showUploadList={false} beforeUpload={handleFileUpload}>
             <Button icon={<UploadOutlined />}>{t('chooseFile')}</Button>
           </Upload>
-          {uploadResult && (uploadResult.error
-            ? <Alert type="error" showIcon message={t(uploadResult.error)} />
-            : <Alert type="success" showIcon message={t('votingUploadSuccess', { fileName: uploadResult.fileName, questionCount: uploadResult.questionCount })} />
+          {!!uploadResult && (
+            uploadResult.error
+              ? <Alert type="error" showIcon message={t(uploadResult.error)} />
+              : <Alert type="success" showIcon message={t('votingUploadSuccess', { fileName: uploadResult.fileName, questionCount: uploadResult.questionCount })} />
           )}
         </Space>
       </Form.Item>
@@ -167,7 +174,7 @@ export default function VotingModeEditor({ content, context, onContentChanged })
                   <Radio.Button value={false}>{t('votingSingleChoice')}</Radio.Button>
                   <Radio.Button value>{t('votingMultipleChoice')}</Radio.Button>
                 </Radio.Group>
-                {(question.multipleChoice ?? false) && (
+                {!!(question.multipleChoice ?? false) && (
                   <Space size="small">
                     <span>{t('votingMaxSelections')}:</span>
                     <InputNumber
@@ -210,4 +217,9 @@ VotingModeEditor.propTypes = {
   content: contentPropType,
   context: contextPropType,
   onContentChanged: onContentChangedPropType
+};
+VotingModeEditor.defaultProps = {
+  content: null,
+  context: null,
+  onContentChanged: null
 };

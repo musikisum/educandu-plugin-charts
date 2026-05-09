@@ -1,12 +1,12 @@
 import React from 'react';
 import { Form, Radio } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { useUser } from '@educandu/educandu/components/user-context.js';
-import { FORM_ITEM_LAYOUT } from '@educandu/educandu/domain/constants.js';
-import { sectionEditorProps } from '@educandu/educandu/ui/default-prop-types.js';
-import { CHART_TYPE, createDefaultVotingContent } from './charts-info.js';
 import ChartModeEditor from './chart-mode-editor.js';
 import VotingModeEditor from './voting-mode-editor.js';
+import { useUser } from '@educandu/educandu/components/user-context.js';
+import { FORM_ITEM_LAYOUT } from '@educandu/educandu/domain/constants.js';
+import { CHART_TYPE, createDefaultVotingContent } from './charts-info.js';
+import { sectionEditorProps } from '@educandu/educandu/ui/default-prop-types.js';
 
 export default function ChartsEditor({ context, content, onContentChanged }) {
   const { t } = useTranslation('musikisum/educandu-plugin-charts');
@@ -34,10 +34,9 @@ export default function ChartsEditor({ context, content, onContentChanged }) {
           <Radio.Group
             value={content.mode}
             onChange={e => handleModeChange(e.target.value)}
-            disabled={content.mode === 'voting' && content.isLocked}
             >
-            <Radio.Button value="chart">{t('modeChart')}</Radio.Button>
-            <Radio.Button value="voting" disabled={!window.__initalState__?.room}>{t('modeVoting')}</Radio.Button>
+            <Radio.Button value="chart" disabled={content.mode === 'voting' && content.isLocked}>{t('modeChart')}</Radio.Button>
+            <Radio.Button value="voting" disabled={!window.__initalState__?.room || content.isLocked}>{t('modeVoting')}</Radio.Button>
           </Radio.Group>
         </Form.Item>
         {content.mode === 'chart'

@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from 'vitest';
 import ChartsInfo from './charts-info.js';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('charts-info', () => {
   let sut;

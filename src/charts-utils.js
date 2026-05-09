@@ -103,6 +103,40 @@ export function parseVotingWorkbook(workbook) {
   return { questions, error: null };
 }
 
+export function parseChartText(text) {
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const groups = [];
+  let current = null;
+
+  for (const line of lines) {
+    if (line.startsWith('@@')) {
+      if (current) { groups.push(current); }
+      current = { label: line.slice(2).trim(), values: [] };
+    } else if (current) {
+      const num = Number(line.replace(',', '.'));
+      if (!isNaN(num)) { current.values.push(num); }
+    }
+  }
+  if (current) { groups.push(current); }
+
+  if (!groups.length) {
+    return { chartData: null, error: 'parseErrorNoData', warnings: [] };
+  }
+
+  const datasetCount = Math.max(...groups.map(g => g.values.length));
+  if (datasetCount === 0) {
+    return { chartData: null, error: 'parseErrorNoData', warnings: [] };
+  }
+
+  const labels = groups.map(g => g.label);
+  const datasets = Array.from({ length: datasetCount }, (_, i) => ({
+    label: datasetCount === 1 ? '' : String(i + 1),
+    data: groups.map(g => g.values[i] ?? 0)
+  }));
+
+  return { chartData: { labels, datasets }, error: null, warnings: [] };
+}
+
 export function parseVotingText(text) {
   const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
   const questions = [];
@@ -156,7 +190,7 @@ export function getDataRange(chartData) {
   const allValues = chartData.datasets.flatMap(ds => ds.data);
   if (!allValues.length) { return null; }
   return {
-    min: allValues.reduce((acc, v) => (v < acc ? v : acc), allValues[0]),
-    max: allValues.reduce((acc, v) => (v > acc ? v : acc), allValues[0])
+    min: allValues.reduce((acc, v) => v < acc ? v : acc, allValues[0]),
+    max: allValues.reduce((acc, v) => v > acc ? v : acc, allValues[0])
   };
 }

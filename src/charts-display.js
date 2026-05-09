@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
+import { BEHAVIOR } from './charts-info.js';
+import { useTranslation } from 'react-i18next';
 import { Alert, Checkbox, Radio, Space } from 'antd';
+import Collapsible from '@educandu/educandu/components/collapsible.js';
+import { useUser } from '@educandu/educandu/components/user-context.js';
 import { Bar, Line, Pie, Doughnut, Radar, PolarArea } from 'react-chartjs-2';
+import { sectionDisplayProps } from '@educandu/educandu/ui/default-prop-types.js';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -14,11 +19,6 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
-import { useTranslation } from 'react-i18next';
-import { useUser } from '@educandu/educandu/components/user-context.js';
-import { sectionDisplayProps } from '@educandu/educandu/ui/default-prop-types.js';
-import Collapsible from '@educandu/educandu/components/collapsible.js';
-import { BEHAVIOR } from './charts-info.js';
 
 ChartJS.register(CategoryScale, LinearScale, RadialLinearScale, BarElement, LineElement, PointElement, ArcElement, Title, Tooltip, Legend);
 
@@ -206,6 +206,12 @@ VotingForm.propTypes = {
   input: inputPropType,
   canModifyInput: canModifyInputPropType,
   onInputChanged: onInputChangedPropType
+};
+VotingForm.defaultProps = {
+  content: null,
+  input: null,
+  canModifyInput: false,
+  onInputChanged: null
 };
 
 export default function ChartsDisplay({ content, input, canModifyInput, onInputChanged }) {

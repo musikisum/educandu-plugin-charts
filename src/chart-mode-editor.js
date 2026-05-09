@@ -1,22 +1,22 @@
 import React, { useState } from 'react';
 import { Alert, Button, Form, Input, InputNumber, Radio, Select, Space, Upload } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+import { UploadOutlined } from '@ant-design/icons';
 import Info from '@educandu/educandu/components/info.js';
-import ObjectWidthSlider from '@educandu/educandu/components/object-width-slider.js';
+import { CHART_TYPE, AXIS_CHART_TYPES, BEHAVIOR } from './charts-info.js';
 import { FORM_ITEM_LAYOUT } from '@educandu/educandu/domain/constants.js';
 import { sectionEditorProps } from '@educandu/educandu/ui/default-prop-types.js';
-import { CHART_TYPE, AXIS_CHART_TYPES, BEHAVIOR } from './charts-info.js';
-import { parseChartWorkbook, readFile, getDataRange, MAX_UPLOAD_BYTES } from './charts-utils.js';
+import ObjectWidthSlider from '@educandu/educandu/components/object-width-slider.js';
+import { parseChartWorkbook, parseChartText, readFile, getDataRange, MAX_UPLOAD_BYTES } from './charts-utils.js';
 
 const CHART_TYPE_OPTIONS = [
-  { value: CHART_TYPE.bar,           labelKey: 'chartTypeBar' },
+  { value: CHART_TYPE.bar, labelKey: 'chartTypeBar' },
   { value: CHART_TYPE.barHorizontal, labelKey: 'chartTypeBarHorizontal' },
-  { value: CHART_TYPE.line,          labelKey: 'chartTypeLine' },
-  { value: CHART_TYPE.pie,           labelKey: 'chartTypePie' },
-  { value: CHART_TYPE.doughnut,      labelKey: 'chartTypeDoughnut' },
-  { value: CHART_TYPE.radar,         labelKey: 'chartTypeRadar' },
-  { value: CHART_TYPE.polarArea,     labelKey: 'chartTypePolarArea' }
+  { value: CHART_TYPE.line, labelKey: 'chartTypeLine' },
+  { value: CHART_TYPE.pie, labelKey: 'chartTypePie' },
+  { value: CHART_TYPE.doughnut, labelKey: 'chartTypeDoughnut' },
+  { value: CHART_TYPE.radar, labelKey: 'chartTypeRadar' },
+  { value: CHART_TYPE.polarArea, labelKey: 'chartTypePolarArea' }
 ];
 
 export default function ChartModeEditor({ content, onContentChanged }) {
@@ -30,19 +30,34 @@ export default function ChartModeEditor({ content, onContentChanged }) {
       setUploadResult({ fileName: file.name, error: 'parseErrorFileTooLarge', warnings: [] });
       return false;
     }
-    readFile(
-      file,
-      workbook => {
-        const { chartData, error, warnings } = parseChartWorkbook(workbook);
+    if (/\.txt$/i.test(file.name)) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const { chartData, error, warnings } = parseChartText(e.target.result);
         if (chartData) {
           updateContent({ chartData });
           setUploadResult({ fileName: file.name, error: null, warnings, labelCount: chartData.labels.length, datasetCount: chartData.datasets.length });
         } else {
           setUploadResult({ fileName: file.name, error, warnings: [] });
         }
-      },
-      () => setUploadResult({ fileName: file.name, error: 'fileReadError', warnings: [] })
-    );
+      };
+      reader.onerror = () => setUploadResult({ fileName: file.name, error: 'fileReadError', warnings: [] });
+      reader.readAsText(file);
+    } else {
+      readFile(
+        file,
+        workbook => {
+          const { chartData, error, warnings } = parseChartWorkbook(workbook);
+          if (chartData) {
+            updateContent({ chartData });
+            setUploadResult({ fileName: file.name, error: null, warnings, labelCount: chartData.labels.length, datasetCount: chartData.datasets.length });
+          } else {
+            setUploadResult({ fileName: file.name, error, warnings: [] });
+          }
+        },
+        () => setUploadResult({ fileName: file.name, error: 'fileReadError', warnings: [] })
+      );
+    }
     return false;
   };
 
@@ -65,7 +80,7 @@ export default function ChartModeEditor({ content, onContentChanged }) {
           <Upload accept=".xlsx,.xls,.ods,.csv,.txt" showUploadList={false} beforeUpload={handleFileUpload}>
             <Button icon={<UploadOutlined />}>{t('chooseFile')}</Button>
           </Upload>
-          {uploadResult && (
+          {!!uploadResult && (
             <Space direction="vertical" style={{ width: '100%' }}>
               {uploadResult.error
                 ? <Alert type="error" showIcon message={t(uploadResult.error)} />
@@ -83,32 +98,34 @@ export default function ChartModeEditor({ content, onContentChanged }) {
           )}
         </Space>
       </Form.Item>
-      {showAxisControls && (
-        <Form.Item
-          label={t('valueAxis')}
-          {...FORM_ITEM_LAYOUT}
-          validateStatus={axisRangeInvalid ? 'error' : ''}
-          help={axisRangeInvalid ? t('axisRangeError') : null}
-          >
-          <Space align="center">
-            <span>{t('min')}:</span>
-            <InputNumber
-              placeholder={t('auto')}
-              value={axisMin}
-              onChange={v => updateContent({ axisMin: v })}
-              style={{ width: 90 }}
-              />
-            <span>{t('max')}:</span>
-            <InputNumber
-              placeholder={t('auto')}
-              value={axisMax}
-              onChange={v => updateContent({ axisMax: v })}
-              style={{ width: 90 }}
-              />
-            {dataRange && <span style={{ color: '#888', fontSize: 12 }}>{t('dataRange', { min: dataRange.min, max: dataRange.max })}</span>}
-          </Space>
-        </Form.Item>
-      )}
+      {showAxisControls
+        ? (
+          <Form.Item
+            label={t('valueAxis')}
+            {...FORM_ITEM_LAYOUT}
+            validateStatus={axisRangeInvalid ? 'error' : ''}
+            help={axisRangeInvalid ? t('axisRangeError') : null}
+            >
+            <Space align="center">
+              <span>{t('min')}:</span>
+              <InputNumber
+                placeholder={t('auto')}
+                value={axisMin}
+                onChange={v => updateContent({ axisMin: v })}
+                style={{ width: 90 }}
+                />
+              <span>{t('max')}:</span>
+              <InputNumber
+                placeholder={t('auto')}
+                value={axisMax}
+                onChange={v => updateContent({ axisMax: v })}
+                style={{ width: 90 }}
+                />
+              {!!dataRange && <span style={{ color: '#888', fontSize: 12 }}>{t('dataRange', { min: dataRange.min, max: dataRange.max })}</span>}
+            </Space>
+          </Form.Item>
+        )
+        : null}
       <Form.Item label={t('behavior')} {...FORM_ITEM_LAYOUT}>
         <Radio.Group
           value={content.behavior ?? BEHAVIOR.static}
@@ -136,4 +153,8 @@ const { content: contentPropType, onContentChanged: onContentChangedPropType } =
 ChartModeEditor.propTypes = {
   content: contentPropType,
   onContentChanged: onContentChangedPropType
+};
+ChartModeEditor.defaultProps = {
+  content: null,
+  onContentChanged: null
 };

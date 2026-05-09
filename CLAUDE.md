@@ -21,11 +21,7 @@ Es wird unter dem npm-Scope `@musikisum` veröffentlicht.
 - Basis-Struktur läuft (yarn, Docker, gulp serve funktionieren)
 - **chart-Mode vollständig implementiert** (siehe unten)
 - **voting-Mode vollständig implementiert** (siehe unten)
-- Auf npm veröffentlicht als `v0.9.0`
-
-**Offenes Problem (v0.9.0):** Orangener linker Rand (educandu `SectionDisplay--allowsInput`)
-erscheint nicht für aktive Abstimmungen im Raum. Ursache noch nicht abschließend geklärt —
-zur Untersuchung in der nächsten Session.
+- Auf npm veröffentlicht als `v1.0.0`
 
 ## Schlüsseldateien
 
@@ -457,40 +453,9 @@ Das `input`-Objekt hat immer die Struktur `{ data: {...}, files: [...] }`.
 
 ---
 
-## Offene Probleme / TODO
-
-### Orangener linker Rand bei aktiver Abstimmung fehlt
-
-**Problem:** Wenn ein Nutzer in einem Raum aktiv abstimmt (voting-Mode, nicht gesperrt),
-sollte educandus orangener linker Rand (`#EAA58D`) erscheinen — als Signal, dass
-Eingaben möglich sind. Der Rand erscheint derzeit nicht.
-
-**Erwartetes Verhalten:** educandu fügt `.SectionDisplay--allowsInput` zum Wrapper hinzu,
-wenn `allowsInput = true` in der Info-Klasse gesetzt ist. Die CSS-Regel:
-```css
-.SectionDisplay.SectionDisplay--allowsInput { border-left: 3px solid #EAA58D; }
-```
-sollte greifen, da der aktive Voting-Wrapper KEINE `--noInput`-Klasse hat (unser LESS
-entfernt den Rand nur für `--noInput`-Varianten).
-
-**Bisherige Untersuchung:** Die Klasse `SectionDisplay--allowsInput` ist laut educandu-Quellcode
-korrekt implementiert; der Plugin-Code setzt `--noInput` nur für die richtigen Fälle.
-Warum der Rand trotzdem fehlt, ist unklar. Mögliche Ursachen: DOM-Inspektion nötig,
-ob die Klasse tatsächlich im Browser gesetzt wird; oder ob educandus compiled CSS
-eine andere Selector-Spezifität hat.
-
-**Nächste Schritte für die Untersuchung:**
-1. Im Browser-DevTools prüfen: Hat der `.SectionDisplay`-Wrapper die Klasse `SectionDisplay--allowsInput`?
-2. Falls ja: Welche CSS-Regel gewinnt? (Computed Styles → border-left)
-3. Falls nein: Warum setzt educandu die Klasse nicht? (`allowsInput`-Handling im Plugin-System prüfen)
-
----
-
 ## Nächste Schritte
 
-1. **Offenes Problem beheben** — orangener Rand für aktive Abstimmung (siehe oben)
-
-2. **OMA-App einbinden**:
+1. **OMA-App einbinden**:
    - `enabledPlugins`: `'musikisum/educandu-plugin-charts'` hinzufügen
    - `resources`: `translations.json` Pfad hinzufügen
    - Kein Controller-Eintrag nötig (voting läuft über documentInput-System)
