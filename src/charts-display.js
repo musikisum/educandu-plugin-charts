@@ -200,8 +200,12 @@ function VotingForm({ content, input, canModifyInput, onInputChanged }) {
   );
 }
 
+const { content: contentPropType, input: inputPropType, canModifyInput: canModifyInputPropType, onInputChanged: onInputChangedPropType } = sectionDisplayProps;
 VotingForm.propTypes = {
-  ...sectionDisplayProps
+  content: contentPropType,
+  input: inputPropType,
+  canModifyInput: canModifyInputPropType,
+  onInputChanged: onInputChangedPropType
 };
 
 export default function ChartsDisplay({ content, input, canModifyInput, onInputChanged }) {
@@ -213,7 +217,7 @@ export default function ChartsDisplay({ content, input, canModifyInput, onInputC
 
     if (content.isLocked && content.results) {
       const multipleQuestions = content.questions.length > 1;
-      const maxOptions = Math.max(...content.questions.map(q => q.options.length));
+      const maxOptions = content.questions.reduce((acc, q) => Math.max(acc, q.options.length), 1);
       const barThickness = Math.max(20, Math.min(80, Math.floor(300 / maxOptions)));
       const behavior = content.behavior ?? BEHAVIOR.static;
       const hasTitle = !!content.title;
@@ -248,7 +252,7 @@ export default function ChartsDisplay({ content, input, canModifyInput, onInputC
       );
 
       return (
-        <div className="EP_Musikisum_Charts_Display">
+        <div className="EP_Musikisum_Charts_Display EP_Musikisum_Charts_Display--noInput">
           <div style={{ width: `${content.width ?? 100}%`, margin: '0 auto' }}>
             {useCollapsible
               ? (
@@ -265,6 +269,15 @@ export default function ChartsDisplay({ content, input, canModifyInput, onInputC
         </div>
       );
     }
+    const isRoomDocument = !!window.__initalState__?.room;
+    if (!isRoomDocument) {
+      return (
+        <div className="EP_Musikisum_Charts_Display EP_Musikisum_Charts_Display--noInput">
+          <Alert type="warning" showIcon message={t('votingNotAvailable')} />
+        </div>
+      );
+    }
+
     return (
       <div className={`EP_Musikisum_Charts_Display${!canModifyInput && !hasVoteData ? ' EP_Musikisum_Charts_Display-votingForm' : ''}`}>
         <VotingForm
@@ -290,7 +303,7 @@ export default function ChartsDisplay({ content, input, canModifyInput, onInputC
     : <div className="EP_Musikisum_Charts_Display-empty">{t('noData')}</div>;
 
   return (
-    <div className="EP_Musikisum_Charts_Display">
+    <div className="EP_Musikisum_Charts_Display EP_Musikisum_Charts_Display--noInput">
       <div style={{ width: `${content.width ?? 100}%`, margin: '0 auto' }}>
         {useCollapsible
           ? (

@@ -72,6 +72,14 @@
       "en": "{fileName} — {labelCount} labels, {datasetCount} datasets loaded",
       "de": "{fileName} — {labelCount} Labels, {datasetCount} Datensätze geladen"
     },
+    "parseErrorFileTooLarge": {
+      "en": "The file is too large (max. 5 MB).",
+      "de": "Die Datei ist zu groß (max. 5 MB)."
+    },
+    "fileReadError": {
+      "en": "The file could not be read.",
+      "de": "Die Datei konnte nicht gelesen werden."
+    },
     "parseErrorTooFewRows": {
       "en": "The file must contain at least one header row and one data row.",
       "de": "Die Datei muss mindestens eine Kopfzeile und eine Datenzeile enthalten."

@@ -21,7 +21,11 @@ Es wird unter dem npm-Scope `@musikisum` veröffentlicht.
 - Basis-Struktur läuft (yarn, Docker, gulp serve funktionieren)
 - **chart-Mode vollständig implementiert** (siehe unten)
 - **voting-Mode vollständig implementiert** (siehe unten)
-- Auf npm veröffentlicht als `v0.8.0`
+- Auf npm veröffentlicht als `v0.9.0`
+
+**Offenes Problem (v0.9.0):** Orangener linker Rand (educandu `SectionDisplay--allowsInput`)
+erscheint nicht für aktive Abstimmungen im Raum. Ursache noch nicht abschließend geklärt —
+zur Untersuchung in der nächsten Session.
 
 ## Schlüsseldateien
 
@@ -29,7 +33,12 @@ Es wird unter dem npm-Scope `@musikisum` veröffentlicht.
 |-------|-------|
 | `src/charts-info.js` | Plugin-Metadaten, typeName, CHART_TYPE, AXIS_CHART_TYPES, Joi-Schema, beide Modi |
 | `src/charts-display.js` | Darstellungskomponente — Chart-Mode und Voting-Mode (Formular + Ergebnisanzeige) |
-| `src/charts-editor.js` | Editor — Datei-Upload, Chart-Typ, Achsen-Controls, Fragen-Editor, Sperr-Button |
+| `src/charts-editor.js` | Editor — nur Mode-Toggle, delegiert an ChartModeEditor / VotingModeEditor |
+| `src/chart-mode-editor.js` | Editor-Unterkomponente für chart-Mode |
+| `src/voting-mode-editor.js` | Editor-Unterkomponente für voting-Mode (inkl. Sperr-Button) |
+| `src/charts-utils.js` | Reine Utility-Funktionen: parseChartWorkbook, parseVotingWorkbook, parseVotingText, readFile, collectLatestVotes, getDataRange, MAX_UPLOAD_BYTES |
+| `src/charts-info.spec.js` | Tests für ChartsInfo (validateContent, cloneContent, getDefaultContent) |
+| `src/charts-utils.spec.js` | Tests für die reinen Utility-Funktionen |
 | `src/chart-icon.js` | Custom SVG-Icon (aus Inkscape bereinigt, nutzt currentColor) |
 | `src/charts.yml` | Übersetzungsschlüssel (Quelle!) |
 | `src/translations.json` | Generiert aus charts.yml — nie direkt bearbeiten! |
@@ -102,7 +111,7 @@ und Plugin-Proliferation in der Open Music Academy soll vermieden werden.
 **Wichtig:** Die Excel/ODS/CSV-Datei wird im Editor lokal mit xlsx geparst —
 kein CDN-Upload, keine URL gespeichert. Die geparsten Daten landen direkt im Content.
 
-### Content-Modell (voting-Mode, noch nicht implementiert)
+### Content-Modell (voting-Mode)
 
 ```js
 {
@@ -165,9 +174,9 @@ Mar      |    30    |   25
 Farben: bei pie/doughnut/polarArea eine Farbe pro Label (aus `PIE_LIKE_TYPES`),
 bei allen anderen eine Farbe pro Dataset.
 
-### Upload-Validierung im Editor
+### Upload-Validierung
 
-`parseWorkbook()` in `charts-editor.js` gibt zurück:
+`parseChartWorkbook()` / `parseVotingWorkbook()` in `charts-utils.js` gibt zurück:
 - `error`: harter Fehler (Datei wird nicht geladen) → Schlüssel für t()
 - `warnings`: Array von Warnungen (Datei wird geladen, Hinweise erscheinen)
 
@@ -300,48 +309,34 @@ Ergebnis zeigen:   content.results   →  statisch nach dem Sperren
 
 Die gesamte Infrastruktur (DB-Collection, Room-Prüfung, Cleanup) stellt educandu bereit.
 
-#### Was im Code geändert/hinzugefügt werden muss
+#### Implementierungsübersicht (v0.9.0)
 
-**`src/charts-info.js`:**
-```js
-// NEU: allowsInput aktiviert das documentInput-System
-allowsInput = true;
+**`src/charts-info.js`:** `allowsInput = true`, konditionales Joi-Schema für beide Modi,
+`cloneContent` setzt `isLocked: false` + `results: null` für voting-Duplikate,
+`createDefaultVotingContent(ownerUserId)` generiert `votingId` per `uniqueId.create()`.
 
-// NEU: voting-Felder im Schema (konditional je nach mode)
-validateContent(content) {
-  const baseSchema = joi.object({ mode: joi.string().valid('chart', 'voting') });
-  if (content.mode === 'chart') { /* bisheriges Schema */ }
-  if (content.mode === 'voting') { /* voting-Schema */ }
-}
+**`src/charts-editor.js`:** Mode-Toggle (Radio.Group chart|voting), voting-Button deaktiviert
+wenn kein Raum (`window.__initalState__?.room`). Delegiert an `ChartModeEditor` / `VotingModeEditor`.
 
-// NEU: cloneContent generiert neue question/option keys (damit Duplikate unabhängig sind)
-cloneContent(content) {
-  if (content.mode !== 'voting') return cloneDeep(content);
-  return {
-    ...cloneDeep(content),
-    results: null,    // Ergebnisse werden nicht dupliziert
-    isLocked: false   // Duplikat startet neu
-  };
-}
+**`src/chart-mode-editor.js`:** Datei-Upload (max. 5 MB), Chart-Typ, Achsen-Controls,
+Behavior, Titel, Breite.
 
-// NEU: getDefaultContent für voting
-// (wird beim Mode-Wechsel im Editor aufgerufen, nicht beim Erstellen)
-```
-
-**`src/charts-editor.js`:**
-- `Segmented`-Komponente oben: `chart | voting` Mode-Toggle
-- Bei `voting`: Fragen-Editor (Fragen hinzufügen/entfernen, Optionen pro Frage)
-- "Abstimmung sperren"-Button: ruft API auf, aggregiert, speichert Content
-- Bei `isLocked`: Hinweis "Abstimmung gesperrt" + Ergebnis-Vorschau
+**`src/voting-mode-editor.js`:** Datei-Upload für Fragen (xlsx/ods/txt), Single-/Multiple-Choice
+pro Frage, MaxSelections, Submission-Count-Anzeige, Sperr-Button. Nach dem Sperren:
+nur noch Behavior/Titel/Breite editierbar.
 
 **`src/charts-display.js`:**
-- Bei `mode === 'voting'` und `!isLocked`: Abstimmungsformular anzeigen
-  - Für jede Frage: Radio-Buttons (eine Antwort) oder Checkboxes (mehrere)
-  - Aktuell gewählte Option aus `input.data` vorauswählen
-  - Bei Klick: `onInputChanged({ ...input.data, [questionKey]: optionKey })`
-- Bei `mode === 'voting'` und `isLocked`: Ergebnisse aus `content.results` als Chart
-  - Chart-Typ: `bar` (horizontal, eine Bar pro Option, Zähler als Wert)
-  - Oder pro Frage ein separates Diagramm
+- `mode === 'chart'`: Chart rendern (immer `--noInput`)
+- `mode === 'voting'` + öffentlicher Bereich: Warning-Alert (immer `--noInput`)
+- `mode === 'voting'` + `isLocked`: Ergebnisse als Bar-Chart (immer `--noInput`)
+- `mode === 'voting'` + Raum + aktiv: `VotingForm` — Radio/Checkbox-Formular, `onInputChanged`
+
+**`src/charts-utils.js`:** `parseChartWorkbook`, `parseVotingWorkbook`, `parseVotingText`,
+`readFile` (mit `onError`-Callback), `collectLatestVotes`, `getDataRange`, `MAX_UPLOAD_BYTES`.
+
+**`src/charts.less`:** Entfernt orangenen Rand für alle `--noInput`-Wrappers (chart-Mode,
+locked voting, öffentlicher Bereich). Aktive Abstimmung im Raum behält den Rahmen
+(TODO: Rand wird derzeit noch nicht angezeigt — siehe Offene Probleme).
 
 #### Joi-Schema für voting-Mode
 
@@ -462,14 +457,45 @@ Das `input`-Objekt hat immer die Struktur `{ data: {...}, files: [...] }`.
 
 ---
 
+## Offene Probleme / TODO
+
+### Orangener linker Rand bei aktiver Abstimmung fehlt
+
+**Problem:** Wenn ein Nutzer in einem Raum aktiv abstimmt (voting-Mode, nicht gesperrt),
+sollte educandus orangener linker Rand (`#EAA58D`) erscheinen — als Signal, dass
+Eingaben möglich sind. Der Rand erscheint derzeit nicht.
+
+**Erwartetes Verhalten:** educandu fügt `.SectionDisplay--allowsInput` zum Wrapper hinzu,
+wenn `allowsInput = true` in der Info-Klasse gesetzt ist. Die CSS-Regel:
+```css
+.SectionDisplay.SectionDisplay--allowsInput { border-left: 3px solid #EAA58D; }
+```
+sollte greifen, da der aktive Voting-Wrapper KEINE `--noInput`-Klasse hat (unser LESS
+entfernt den Rand nur für `--noInput`-Varianten).
+
+**Bisherige Untersuchung:** Die Klasse `SectionDisplay--allowsInput` ist laut educandu-Quellcode
+korrekt implementiert; der Plugin-Code setzt `--noInput` nur für die richtigen Fälle.
+Warum der Rand trotzdem fehlt, ist unklar. Mögliche Ursachen: DOM-Inspektion nötig,
+ob die Klasse tatsächlich im Browser gesetzt wird; oder ob educandus compiled CSS
+eine andere Selector-Spezifität hat.
+
+**Nächste Schritte für die Untersuchung:**
+1. Im Browser-DevTools prüfen: Hat der `.SectionDisplay`-Wrapper die Klasse `SectionDisplay--allowsInput`?
+2. Falls ja: Welche CSS-Regel gewinnt? (Computed Styles → border-left)
+3. Falls nein: Warum setzt educandu die Klasse nicht? (`allowsInput`-Handling im Plugin-System prüfen)
+
+---
+
 ## Nächste Schritte
 
-1. **OMA-App einbinden**:
+1. **Offenes Problem beheben** — orangener Rand für aktive Abstimmung (siehe oben)
+
+2. **OMA-App einbinden**:
    - `enabledPlugins`: `'musikisum/educandu-plugin-charts'` hinzufügen
    - `resources`: `translations.json` Pfad hinzufügen
    - Kein Controller-Eintrag nötig (voting läuft über documentInput-System)
 
-2. **Veröffentlichung** — `git tag vX.Y.Z && git push origin vX.Y.Z`
+3. **Veröffentlichung** — `git tag vX.Y.Z && git push origin vX.Y.Z`
    (Tag-Push triggert GitHub Actions → baut → publiziert auf npm automatisch)
 
-3. **Testen** — Abstimmung mit anonymen Benutzern noch nicht getestet
+4. **Testen** — Abstimmung mit anonymen Benutzern noch nicht getestet
