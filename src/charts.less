@@ -1,8 +1,29 @@
-.EP_Educandu_Example_Display {}
-
-.EP_Educandu_Example_Display-time {
-  font-style: italic;
-  margin-top: @edu-page-content-padding;
+.SectionDisplay--allowsInput:has(.EP_Musikisum_Charts_Display) {
+  border-left: none;
+  border-radius: 0;
 }
 
-.EP_Educandu_Example_Editor {}
+.EP_Musikisum_Charts_Display {
+  .Collapsible-content {
+    display: block;
+    width: 100%;
+  }
+}
+
+.EP_Musikisum_Charts_Display-empty {
+  font-style: italic;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.EP_Musikisum_Charts_Display-questionText {
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.EP_Musikisum_Charts_Display-votingForm {
+  border-left: 3px solid #EAA58D;
+  border-radius: 15px;
+  padding: 12px 16px;
+}
+
+.EP_Musikisum_Charts_Editor {}

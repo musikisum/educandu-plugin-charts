@@ -65,8 +65,8 @@
       "de": "Datei"
     },
     "chooseFile": {
-      "en": "Choose file (.xlsx, .ods, .csv)",
-      "de": "Datei wählen (.xlsx, .ods, .csv)"
+      "en": "Choose file (.xlsx, .ods, .csv, .txt)",
+      "de": "Datei wählen (.xlsx, .ods, .csv, .txt)"
     },
     "uploadSuccess": {
       "en": "{fileName} — {labelCount} labels, {datasetCount} datasets loaded",
@@ -95,6 +95,118 @@
     "noData": {
       "en": "No data loaded yet. Please upload a file in the editor.",
       "de": "Noch keine Daten geladen. Bitte im Editor eine Datei hochladen."
+    },
+    "title": {
+      "en": "Title",
+      "de": "Titel"
+    },
+    "votingResultsTitle": {
+      "en": "Voting results",
+      "de": "Abstimmungsergebnis"
+    },
+    "behavior": {
+      "en": "Display",
+      "de": "Anzeige"
+    },
+    "behavior_static": {
+      "en": "Static",
+      "de": "Statisch"
+    },
+    "behavior_expandable": {
+      "en": "Expandable",
+      "de": "Ausklappbar"
+    },
+    "behavior_collapsible": {
+      "en": "Collapsible",
+      "de": "Einklappbar"
+    },
+    "mode": {
+      "en": "Mode",
+      "de": "Modus"
+    },
+    "modeChart": {
+      "en": "Chart",
+      "de": "Diagramm"
+    },
+    "modeVoting": {
+      "en": "Voting",
+      "de": "Abstimmung"
+    },
+    "votingQuestionPlaceholder": {
+      "en": "Question text...",
+      "de": "Fragetext..."
+    },
+    "votingOptionPlaceholder": {
+      "en": "Option text...",
+      "de": "Optionstext..."
+    },
+    "ownerVotes": {
+      "en": "Moderator votes",
+      "de": "Moderator stimmt ab"
+    },
+    "ownerVotesYes": {
+      "en": "Yes",
+      "de": "Ja"
+    },
+    "ownerVotesNo": {
+      "en": "No",
+      "de": "Nein"
+    },
+    "votingSubmittedHint": {
+      "en": "Your vote has been saved.",
+      "de": "Deine Abstimmung wurde gespeichert."
+    },
+    "votingNotAvailable": {
+      "en": "Voting is only available in room documents.",
+      "de": "Abstimmungen sind nur in Raum-Dokumenten verfügbar."
+    },
+    "votingOwnerExcluded": {
+      "en": "As moderator you are not participating in this vote.",
+      "de": "Als Moderator nimmst du nicht an dieser Abstimmung teil."
+    },
+    "votingUploadSuccess": {
+      "en": "{fileName} — {questionCount} questions loaded",
+      "de": "{fileName} — {questionCount} Fragen geladen"
+    },
+    "votingSubmissions": {
+      "en": "Submissions",
+      "de": "Abgaben"
+    },
+    "votingRefreshCount": {
+      "en": "Refresh",
+      "de": "Aktualisieren"
+    },
+    "votingSubmissionCount": {
+      "en": "{count} submitted",
+      "de": "{count} abgegeben"
+    },
+    "votingLockButton": {
+      "en": "Lock voting and show results",
+      "de": "Abstimmung sperren und auswerten"
+    },
+    "votingLockedHint": {
+      "en": "Voting is locked — results are being displayed.",
+      "de": "Abstimmung gesperrt — Ergebnisse werden angezeigt."
+    },
+    "votingQuestions": {
+      "en": "Questions",
+      "de": "Fragen"
+    },
+    "votingSingleChoice": {
+      "en": "Single",
+      "de": "Einfach"
+    },
+    "votingMultipleChoice": {
+      "en": "Multiple",
+      "de": "Mehrfach"
+    },
+    "votingMaxSelections": {
+      "en": "Max. answers",
+      "de": "Max. Antworten"
+    },
+    "votingNoLimit": {
+      "en": "No limit",
+      "de": "Keine Begrenzung"
     }
   }
 }

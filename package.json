@@ -1,6 +1,6 @@
 {
   "name": "@musikisum/educandu-plugin-charts",
-  "version": "0.0.0",
+  "version": "0.8.0",
   "description": "A charts plugin for educandu",
   "type": "module",
   "exports": {

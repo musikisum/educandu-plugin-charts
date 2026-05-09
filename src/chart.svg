@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="100"
+   height="100"
+   viewBox="0 0 26.458333 26.458333"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   sodipodi:docname="chart.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="5.7584736"
+     inkscape:cx="77.798394"
+     inkscape:cy="55.396624"
+     inkscape:window-width="1920"
+     inkscape:window-height="1010"
+     inkscape:window-x="-6"
+     inkscape:window-y="-6"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#808080;stroke:none;stroke-width:1.08956;stroke-linecap:round;stroke-dasharray:none"
+       id="rect1"
+       width="2.5"
+       height="15.759747"
+       x="4.1589618"
+       y="9.6266298" />
+    <rect
+       style="fill:#808080;stroke:none;stroke-width:1.07342;stroke-linecap:round;stroke-dasharray:none"
+       id="rect1-8"
+       width="2.5"
+       height="10.521813"
+       x="8.2988491"
+       y="14.864564" />
+    <rect
+       style="fill:#808080;stroke:none;stroke-width:1.36584;stroke-linecap:round;stroke-dasharray:none"
+       id="rect1-8-1"
+       width="2.5"
+       height="19.43549"
+       x="12.381102"
+       y="5.9508858" />
+    <rect
+       style="fill:#808080;stroke:none;stroke-width:1.13487;stroke-linecap:round;stroke-dasharray:none"
+       id="rect1-8-1-2"
+       width="2.5"
+       height="15.667853"
+       x="16.492939"
+       y="9.718524" />
+    <rect
+       style="fill:#808080;stroke:none;stroke-width:1.05017;stroke-linecap:round;stroke-dasharray:none"
+       id="rect1-8-1-2-2"
+       width="2.5"
+       height="13.416461"
+       x="20.557287"
+       y="11.969916" />
+    <path
+       style="fill:none;stroke:#4d4d4d;stroke-width:1;stroke-linecap:round;stroke-dasharray:none"
+       d="M 1.6540841,1.5399959 V 25.386376 H 25.040996"
+       id="path1" />
+  </g>
+</svg>
