@@ -97,7 +97,7 @@ class ChartsInfo {
   }
 
   getGroups() {
-    return [PLUGIN_GROUP.mostUsed, PLUGIN_GROUP.other];
+    return [PLUGIN_GROUP.textImage, PLUGIN_GROUP.userInput, PLUGIN_GROUP.other];
   }
 
   async resolveDisplayComponent() {
