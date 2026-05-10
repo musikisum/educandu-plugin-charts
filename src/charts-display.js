@@ -275,7 +275,7 @@ export default function ChartsDisplay({ content, input, canModifyInput, onInputC
         </div>
       );
     }
-    const isRoomDocument = !!window.__initalState__?.room;
+    const isRoomDocument = typeof window !== 'undefined' && !!window.__initalState__?.room;
     if (!isRoomDocument) {
       return (
         <div className="EP_Musikisum_Charts_Display EP_Musikisum_Charts_Display--noInput">
