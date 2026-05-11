@@ -21,7 +21,7 @@ Es wird unter dem npm-Scope `@musikisum` veröffentlicht.
 - Basis-Struktur läuft (yarn, Docker, gulp serve funktionieren)
 - **chart-Mode vollständig implementiert** (siehe unten)
 - **voting-Mode vollständig implementiert** (siehe unten)
-- Auf npm veröffentlicht als `v1.1.0`; aktuelle Version `v1.2.1` (in package.json, Tag+npm-Push erfolgt)
+- Auf npm veröffentlicht als `v1.1.0`; aktuelle Version `v1.2.3` (in package.json, Tag+npm-Push erfolgt)
 
 **Änderungen seit v1.1.0 (v1.2.x):**
 - Voting: localStorage-Persistenz für Votes (`ep-charts-vote-userId-votingId`) — überlebt Browser-Refresh vor Einreichen
@@ -34,6 +34,7 @@ Es wird unter dem npm-Scope `@musikisum` veröffentlicht.
 - `votingSchema` um `colorPalette`, `axisMin`, `axisMax` erweitert (alle `.optional()`)
 - Refactoring: `VotingForm` → `voting-form.js`, gesperrter Editor → `voting-locked-editor.js`; alle Dateien unter 200 Zeilen
 - Defensiv: `Object.values(input.sections ?? {})` in `collectLatestVotes`
+- v1.2.3: Responsive-Fix — `canvas { max-width: 100% }` verhindert Overflow auf kleinen Displays; `window.resize`-Handler erzwingt `chart.resize()` via `requestAnimationFrame`, damit Charts beim Vergrößern des Browsers korrekt neu skalieren
 
 ## Schlüsseldateien
 

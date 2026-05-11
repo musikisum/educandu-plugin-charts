@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Alert, Space } from 'antd';
 import VotingForm from './voting-form.js';
 import { useTranslation } from 'react-i18next';
@@ -69,24 +69,34 @@ function buildOptions(chartType, axisMin, axisMax) {
   }
   const hasCustomScale = Object.keys(scaleOpts).length > 0;
   if (!hasCustomScale) {
-    return chartType === 'barHorizontal' ? { indexAxis: 'y' } : {};
+    return chartType === 'barHorizontal' ? { responsive: true, indexAxis: 'y' } : { responsive: true };
   }
   switch (chartType) {
     case 'barHorizontal':
-      return { indexAxis: 'y', scales: { x: scaleOpts } };
+      return { responsive: true, indexAxis: 'y', scales: { x: scaleOpts } };
     case 'bar':
     case 'line':
-      return { scales: { y: scaleOpts } };
+      return { responsive: true, scales: { y: scaleOpts } };
     case 'radar':
     case 'polarArea':
-      return { scales: { r: scaleOpts } };
+      return { responsive: true, scales: { r: scaleOpts } };
     default:
-      return {};
+      return { responsive: true };
   }
 }
 
 export default function ChartsDisplay({ content, input, canModifyInput, onInputChanged }) {
   const { t } = useTranslation('musikisum/educandu-plugin-charts');
+
+  useEffect(() => {
+    const handleResize = () => {
+      window.requestAnimationFrame(() => {
+        Object.values(ChartJS.instances).forEach(c => c.resize());
+      });
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   if (content.mode === 'voting') {
     const voteData = input?.data?.[content.votingId];
