@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Alert, Button, Form, Input, InputNumber, Radio, Select, Space, Upload } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { UploadOutlined } from '@ant-design/icons';
 import Info from '@educandu/educandu/components/info.js';
-import { CHART_TYPE, AXIS_CHART_TYPES, BEHAVIOR, COLOR_PALETTE } from './charts-info.js';
 import { FORM_ITEM_LAYOUT } from '@educandu/educandu/domain/constants.js';
 import { sectionEditorProps } from '@educandu/educandu/ui/default-prop-types.js';
 import ObjectWidthSlider from '@educandu/educandu/components/object-width-slider.js';
+import { CHART_TYPE, AXIS_CHART_TYPES, BEHAVIOR, COLOR_PALETTE } from './charts-info.js';
+import { Alert, Button, Form, Input, InputNumber, Radio, Select, Space, Upload } from 'antd';
 import { parseChartWorkbook, parseChartText, readFile, getDataRange, MAX_UPLOAD_BYTES } from './charts-utils.js';
 
 const renderLines = text => text.split('\n').map((line, i, arr) => (
@@ -100,7 +100,7 @@ export default function ChartModeEditor({ content, onContentChanged }) {
                     type="success"
                     showIcon
                     message={t('uploadSuccess', { fileName: uploadResult.fileName, labelCount: uploadResult.labelCount, datasetCount: uploadResult.datasetCount })}
-                    />
+                  />
                 )}
               {(uploadResult.warnings || []).map(key => (
                 <Alert key={key} type="warning" showIcon message={t(key)} />
@@ -116,7 +116,7 @@ export default function ChartModeEditor({ content, onContentChanged }) {
             {...FORM_ITEM_LAYOUT}
             validateStatus={axisRangeInvalid ? 'error' : ''}
             help={axisRangeInvalid ? t('axisRangeError') : null}
-            >
+          >
             <Space align="center">
               <span>{t('min')}:</span>
               <InputNumber
@@ -124,14 +124,14 @@ export default function ChartModeEditor({ content, onContentChanged }) {
                 value={axisMin}
                 onChange={v => updateContent({ axisMin: v })}
                 style={{ width: 90 }}
-                />
+              />
               <span>{t('max')}:</span>
               <InputNumber
                 placeholder={t('auto')}
                 value={axisMax}
                 onChange={v => updateContent({ axisMax: v })}
                 style={{ width: 90 }}
-                />
+              />
               {!!dataRange && <span style={{ color: '#888', fontSize: 12 }}>{t('dataRange', { min: dataRange.min, max: dataRange.max })}</span>}
             </Space>
           </Form.Item>
@@ -141,7 +141,7 @@ export default function ChartModeEditor({ content, onContentChanged }) {
         <Radio.Group
           value={content.colorPalette ?? COLOR_PALETTE.tableau}
           onChange={e => updateContent({ colorPalette: e.target.value })}
-          >
+        >
           <Radio.Button value={COLOR_PALETTE.tableau}>{t('colorPaletteTableau')}</Radio.Button>
           <Radio.Button value={COLOR_PALETTE.set2}>{t('colorPaletteSet2')}</Radio.Button>
         </Radio.Group>
@@ -150,7 +150,7 @@ export default function ChartModeEditor({ content, onContentChanged }) {
         <Radio.Group
           value={content.behavior ?? BEHAVIOR.static}
           onChange={e => updateContent({ behavior: e.target.value })}
-          >
+        >
           <Radio.Button value={BEHAVIOR.expandable}>{t('behavior_expandable')}</Radio.Button>
           <Radio.Button value={BEHAVIOR.collapsible}>{t('behavior_collapsible')}</Radio.Button>
           <Radio.Button value={BEHAVIOR.static}>{t('behavior_static')}</Radio.Button>
@@ -160,7 +160,7 @@ export default function ChartModeEditor({ content, onContentChanged }) {
         <Input
           value={content.title ?? ''}
           onChange={e => updateContent({ title: e.target.value })}
-          />
+        />
       </Form.Item>
       <Form.Item label={<Info tooltip={t('common:widthInfo')}>{t('common:width')}</Info>} {...FORM_ITEM_LAYOUT}>
         <ObjectWidthSlider value={content.width ?? 100} onChange={value => updateContent({ width: value })} />

@@ -174,7 +174,7 @@ export function collectLatestVotes(documentInputs, votingId) {
   for (const input of documentInputs) {
     const userId = input.createdBy?._id ?? input.createdBy;
     if (userId && !latestVoteByUser.has(userId)) {
-      for (const section of Object.values(input.sections)) {
+      for (const section of Object.values(input.sections ?? {})) {
         const vote = section.data?.[votingId];
         if (vote && typeof vote === 'object') {
           latestVoteByUser.set(userId, vote);

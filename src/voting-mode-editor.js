@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
-import { BEHAVIOR, COLOR_PALETTE } from './charts-info.js';
 import { useTranslation } from 'react-i18next';
 import { UploadOutlined } from '@ant-design/icons';
-import Info from '@educandu/educandu/components/info.js';
 import uniqueId from '@educandu/educandu/utils/unique-id.js';
 import { FORM_ITEM_LAYOUT } from '@educandu/educandu/domain/constants.js';
 import { useService } from '@educandu/educandu/components/container-context.js';
 import { sectionEditorProps } from '@educandu/educandu/ui/default-prop-types.js';
-import { Alert, Button, Form, Input, InputNumber, Radio, Space, Upload } from 'antd';
-import ObjectWidthSlider from '@educandu/educandu/components/object-width-slider.js';
+import { Alert, Button, Form, InputNumber, Radio, Space, Upload } from 'antd';
 import DocumentInputApiClient from '@educandu/educandu/api-clients/document-input-api-client.js';
+import VotingLockedEditor from './voting-locked-editor.js';
 import {
   parseVotingWorkbook,
   parseVotingText,
@@ -110,66 +108,7 @@ export default function VotingModeEditor({ content, context, onContentChanged })
   };
 
   if (content.isLocked) {
-    const axisMin = content.axisMin ?? null;
-    const axisMax = content.axisMax ?? null;
-    const axisRangeInvalid = axisMin !== null && axisMax !== null && axisMin >= axisMax;
-    return (
-      <React.Fragment>
-        <Alert type="info" showIcon message={t('votingLockedHint')} style={{ marginBottom: 16 }} />
-        <Form.Item label={t('colorPalette')} {...FORM_ITEM_LAYOUT}>
-          <Radio.Group
-            value={content.colorPalette ?? COLOR_PALETTE.tableau}
-            onChange={e => updateContent({ colorPalette: e.target.value })}
-            >
-            <Radio.Button value={COLOR_PALETTE.tableau}>{t('colorPaletteTableau')}</Radio.Button>
-            <Radio.Button value={COLOR_PALETTE.set2}>{t('colorPaletteSet2')}</Radio.Button>
-          </Radio.Group>
-        </Form.Item>
-        <Form.Item
-          label={t('valueAxis')}
-          {...FORM_ITEM_LAYOUT}
-          validateStatus={axisRangeInvalid ? 'error' : ''}
-          help={axisRangeInvalid ? t('axisRangeError') : null}
-          >
-          <Space align="center">
-            <span>{t('min')}:</span>
-            <InputNumber
-              placeholder={t('auto')}
-              value={axisMin}
-              onChange={v => updateContent({ axisMin: v })}
-              style={{ width: 90 }}
-              />
-            <span>{t('max')}:</span>
-            <InputNumber
-              placeholder={t('auto')}
-              value={axisMax}
-              onChange={v => updateContent({ axisMax: v })}
-              style={{ width: 90 }}
-              />
-          </Space>
-        </Form.Item>
-        <Form.Item label={t('behavior')} {...FORM_ITEM_LAYOUT}>
-          <Radio.Group
-            value={content.behavior ?? BEHAVIOR.static}
-            onChange={e => updateContent({ behavior: e.target.value })}
-            >
-            <Radio.Button value={BEHAVIOR.expandable}>{t('behavior_expandable')}</Radio.Button>
-            <Radio.Button value={BEHAVIOR.collapsible}>{t('behavior_collapsible')}</Radio.Button>
-            <Radio.Button value={BEHAVIOR.static}>{t('behavior_static')}</Radio.Button>
-          </Radio.Group>
-        </Form.Item>
-        <Form.Item label={t('title')} {...FORM_ITEM_LAYOUT}>
-          <Input
-            placeholder={t('votingResultsTitle')}
-            value={content.title ?? ''}
-            onChange={e => updateContent({ title: e.target.value })}
-            />
-        </Form.Item>
-        <Form.Item label={<Info tooltip={t('common:widthInfo')}>{t('common:width')}</Info>} {...FORM_ITEM_LAYOUT}>
-          <ObjectWidthSlider value={content.width ?? 100} onChange={value => updateContent({ width: value })} />
-        </Form.Item>
-      </React.Fragment>
-    );
+    return <VotingLockedEditor content={content} onContentChanged={onContentChanged} />;
   }
 
   return (
@@ -178,7 +117,7 @@ export default function VotingModeEditor({ content, context, onContentChanged })
         <Radio.Group
           value={content.ownerVotes}
           onChange={e => updateContent({ ownerVotes: e.target.value })}
-          >
+        >
           <Radio.Button value>{t('ownerVotesYes')}</Radio.Button>
           <Radio.Button value={false}>{t('ownerVotesNo')}</Radio.Button>
         </Radio.Group>
@@ -198,19 +137,23 @@ export default function VotingModeEditor({ content, context, onContentChanged })
       {content.questions.length > 0 && (
         <Form.Item label={t('votingQuestions')} {...FORM_ITEM_LAYOUT}>
           <Space direction="vertical" style={{ width: '100%' }}>
-            {content.questions.map(question => (
-              <Space key={question.key} wrap>
-                <span style={{ minWidth: 140, display: 'inline-block' }}>{question.text}</span>
-                <Radio.Group
-                  size="small"
-                  value={question.multipleChoice ?? false}
-                  onChange={e => updateQuestion(question.key, { multipleChoice: e.target.value, maxSelections: null })}
+            {content.questions.map(question => {
+              const isMultiple = question.multipleChoice ?? false;
+              return (
+                <div key={question.key} style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                  <span style={{ flex: '1 1 0', minWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {question.text}
+                  </span>
+                  <Radio.Group
+                    size="small"
+                    value={isMultiple}
+                    onChange={e => updateQuestion(question.key, { multipleChoice: e.target.value, maxSelections: null })}
+                    style={{ flexShrink: 0 }}
                   >
-                  <Radio.Button value={false}>{t('votingSingleChoice')}</Radio.Button>
-                  <Radio.Button value>{t('votingMultipleChoice')}</Radio.Button>
-                </Radio.Group>
-                {!!(question.multipleChoice ?? false) && (
-                  <Space size="small">
+                    <Radio.Button value={false}>{t('votingSingleChoice')}</Radio.Button>
+                    <Radio.Button value>{t('votingMultipleChoice')}</Radio.Button>
+                  </Radio.Group>
+                  <div style={{ flexShrink: 0, visibility: isMultiple ? 'visible' : 'hidden', display: 'flex', alignItems: 'center', gap: 4 }}>
                     <span>{t('votingMaxSelections')}:</span>
                     <InputNumber
                       size="small"
@@ -220,11 +163,11 @@ export default function VotingModeEditor({ content, context, onContentChanged })
                       onChange={v => updateQuestion(question.key, { maxSelections: v ?? null })}
                       placeholder={t('votingNoLimit')}
                       style={{ width: 90 }}
-                      />
-                  </Space>
-                )}
-              </Space>
-            ))}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </Space>
         </Form.Item>
       )}

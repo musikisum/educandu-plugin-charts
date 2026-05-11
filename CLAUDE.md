@@ -21,26 +21,31 @@ Es wird unter dem npm-Scope `@musikisum` veröffentlicht.
 - Basis-Struktur läuft (yarn, Docker, gulp serve funktionieren)
 - **chart-Mode vollständig implementiert** (siehe unten)
 - **voting-Mode vollständig implementiert** (siehe unten)
-- Auf npm veröffentlicht als `v1.1.0`; nächste Version `v1.2.0` in Arbeit (noch kein Tag/npm-Push)
+- Auf npm veröffentlicht als `v1.1.0`; aktuelle Version `v1.2.1` (in package.json, Tag+npm-Push erfolgt)
 
-**Änderungen seit v1.1.0 (für v1.2.0):**
+**Änderungen seit v1.1.0 (v1.2.x):**
 - Voting: localStorage-Persistenz für Votes (`ep-charts-vote-userId-votingId`) — überlebt Browser-Refresh vor Einreichen
 - Voting: Submit-Button nach Refresh reaktiviert (localStorage-Restore ruft `onInputChanged` auf)
 - Voting: `hasBeenSubmitted`-Flag in sessionStorage (`ep-charts-submitted-userId-votingId`) — verhindert Neuabstimmung wenn educandus `canModifyInput` zurückgesetzt wird
 - Voting: Bestätigungstext nach Einreichen präzisiert ("kann nicht mehr geändert werden")
 - Voting: Farbpalette und Werteachse (Min/Max) auch im gesperrten Editor editierbar
+- Voting: Multiple-Choice-Unterstützung (Checkbox-Gruppe, maxSelections, korrekte Aggregation beim Sperren)
 - chart-Mode-Editor: Hilfe-Tooltip beim Datei-Upload mit Format-Erklärung
 - `votingSchema` um `colorPalette`, `axisMin`, `axisMax` erweitert (alle `.optional()`)
+- Refactoring: `VotingForm` → `voting-form.js`, gesperrter Editor → `voting-locked-editor.js`; alle Dateien unter 200 Zeilen
+- Defensiv: `Object.values(input.sections ?? {})` in `collectLatestVotes`
 
 ## Schlüsseldateien
 
 | Datei | Zweck |
 |-------|-------|
 | `src/charts-info.js` | Plugin-Metadaten, typeName, CHART_TYPE, AXIS_CHART_TYPES, Joi-Schema, beide Modi |
-| `src/charts-display.js` | Darstellungskomponente — Chart-Mode und Voting-Mode (Formular + Ergebnisanzeige) |
+| `src/charts-display.js` | Darstellungskomponente — Chart-Mode und Voting-Mode (Routing + locked results) |
+| `src/voting-form.js` | VotingForm-Komponente — Abstimmungsformular, localStorage/sessionStorage-Logik |
+| `src/voting-locked-editor.js` | Editor-Ansicht für gesperrte Abstimmung (Farbpalette, Achse, Behavior, Titel, Breite) |
 | `src/charts-editor.js` | Editor — nur Mode-Toggle, delegiert an ChartModeEditor / VotingModeEditor |
 | `src/chart-mode-editor.js` | Editor-Unterkomponente für chart-Mode |
-| `src/voting-mode-editor.js` | Editor-Unterkomponente für voting-Mode (inkl. Sperr-Button) |
+| `src/voting-mode-editor.js` | Editor-Unterkomponente für voting-Mode (Upload, Fragen, Sperr-Button) |
 | `src/charts-utils.js` | Reine Utility-Funktionen: parseChartWorkbook, parseVotingWorkbook, parseVotingText, readFile, collectLatestVotes, getDataRange, MAX_UPLOAD_BYTES |
 | `src/charts-info.spec.js` | Tests für ChartsInfo (validateContent, cloneContent, getDefaultContent) |
 | `src/charts-utils.spec.js` | Tests für die reinen Utility-Funktionen |
@@ -318,7 +323,7 @@ Ergebnis zeigen:   content.results   →  statisch nach dem Sperren
 
 Die gesamte Infrastruktur (DB-Collection, Room-Prüfung, Cleanup) stellt educandu bereit.
 
-#### Implementierungsübersicht (v0.9.0)
+#### Implementierungsübersicht (v1.2.1)
 
 **`src/charts-info.js`:** `allowsInput = true`, konditionales Joi-Schema für beide Modi,
 `cloneContent` setzt `isLocked: false` + `results: null` für voting-Duplikate,
@@ -332,7 +337,10 @@ Behavior, Titel, Breite.
 
 **`src/voting-mode-editor.js`:** Datei-Upload für Fragen (xlsx/ods/txt), Single-/Multiple-Choice
 pro Frage, MaxSelections, Submission-Count-Anzeige, Sperr-Button. Nach dem Sperren:
-nur noch Behavior/Titel/Breite editierbar.
+delegiert an `VotingLockedEditor`.
+
+**`src/voting-locked-editor.js`:** Editor-Ansicht nach dem Sperren — Farbpalette, Werteachse
+(Min/Max mit Validierung), Behavior, Titel, Breite.
 
 **`src/charts-display.js`:**
 - `mode === 'chart'`: Chart rendern (immer `--noInput`)
@@ -340,8 +348,15 @@ nur noch Behavior/Titel/Breite editierbar.
 - `mode === 'voting'` + `isLocked`: Ergebnisse als Bar-Chart (immer `--noInput`)
 - `mode === 'voting'` + Raum + aktiv: `VotingForm` — Radio/Checkbox-Formular, `onInputChanged`
 
+**`src/voting-form.js`:** Abstimmungsformular mit gesamter State-Logik:
+- localStorage-Persistenz vor Einreichen (`ep-charts-vote-userId-votingId`)
+- sessionStorage-Flag nach Einreichen (`ep-charts-submitted-userId-votingId`)
+- Single-Choice (Radio) und Multiple-Choice (Checkbox) mit maxSelections-Limit
+- Bestätigungsansicht nach Einreichen (read-only Darstellung der Antworten)
+
 **`src/charts-utils.js`:** `parseChartWorkbook`, `parseVotingWorkbook`, `parseVotingText`,
-`readFile` (mit `onError`-Callback), `collectLatestVotes`, `getDataRange`, `MAX_UPLOAD_BYTES`.
+`readFile` (mit `onError`-Callback), `collectLatestVotes` (mit `sections ?? {}`-Guard),
+`getDataRange`, `MAX_UPLOAD_BYTES`.
 
 **`src/charts.less`:** Entfernt orangenen Rand für alle `--noInput`-Wrappers (chart-Mode,
 locked voting, öffentlicher Bereich). Aktive Abstimmung im Raum behält den Rahmen
@@ -484,10 +499,4 @@ Das `input`-Objekt hat immer die Struktur `{ data: {...}, files: [...] }`.
    - `resources`: `translations.json` Pfad hinzufügen
    - Kein Controller-Eintrag nötig (voting läuft über documentInput-System)
 
-3. **Refactoring `charts-display.js`** — Datei hat ~430 Zeilen; `VotingForm` und `ChartsDisplay`
-   in separate Dateien aufteilen (`voting-form.js` + `voting-results.js` o.ä.)
-
-4. **Veröffentlichung v1.2.0** — nach erfolgreichem Testen:
-   `git tag v1.2.0 && git push origin v1.2.0`
-
-5. **Testen** — Abstimmung mit anonymen Benutzern noch nicht getestet
+2. **Testen** — Abstimmung mit anonymen Benutzern noch nicht vollständig getestet
