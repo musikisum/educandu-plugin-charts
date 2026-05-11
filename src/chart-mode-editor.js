@@ -3,7 +3,7 @@ import { Alert, Button, Form, Input, InputNumber, Radio, Select, Space, Upload }
 import { useTranslation } from 'react-i18next';
 import { UploadOutlined } from '@ant-design/icons';
 import Info from '@educandu/educandu/components/info.js';
-import { CHART_TYPE, AXIS_CHART_TYPES, BEHAVIOR } from './charts-info.js';
+import { CHART_TYPE, AXIS_CHART_TYPES, BEHAVIOR, COLOR_PALETTE } from './charts-info.js';
 import { FORM_ITEM_LAYOUT } from '@educandu/educandu/domain/constants.js';
 import { sectionEditorProps } from '@educandu/educandu/ui/default-prop-types.js';
 import ObjectWidthSlider from '@educandu/educandu/components/object-width-slider.js';
@@ -126,6 +126,15 @@ export default function ChartModeEditor({ content, onContentChanged }) {
           </Form.Item>
         )
         : null}
+      <Form.Item label={t('colorPalette')} {...FORM_ITEM_LAYOUT}>
+        <Radio.Group
+          value={content.colorPalette ?? COLOR_PALETTE.tableau}
+          onChange={e => updateContent({ colorPalette: e.target.value })}
+          >
+          <Radio.Button value={COLOR_PALETTE.tableau}>{t('colorPaletteTableau')}</Radio.Button>
+          <Radio.Button value={COLOR_PALETTE.set2}>{t('colorPaletteSet2')}</Radio.Button>
+        </Radio.Group>
+      </Form.Item>
       <Form.Item label={t('behavior')} {...FORM_ITEM_LAYOUT}>
         <Radio.Group
           value={content.behavior ?? BEHAVIOR.static}

@@ -44,6 +44,15 @@ musikisum/educandu-plugin-charts:
   axisRangeError:
     en: Min must be less than Max
     de: Min muss kleiner als Max sein
+  colorPalette:
+    en: Color palette
+    de: Farbpalette
+  colorPaletteTableau:
+    en: Tableau
+    de: Tableau
+  colorPaletteSet2:
+    en: Pastel
+    de: Pastell
   dataFile:
     en: Data file
     de: Datei
@@ -146,6 +155,9 @@ musikisum/educandu-plugin-charts:
   votingLockedHint:
     en: Voting is locked — results are being displayed.
     de: Abstimmung gesperrt — Ergebnisse werden angezeigt.
+  votingWasClosed:
+    en: The voting has been closed by the moderator.
+    de: Die Abstimmung wurde vom Moderator geschlossen.
   votingQuestions:
     en: Questions
     de: Fragen

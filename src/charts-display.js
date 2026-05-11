@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BEHAVIOR } from './charts-info.js';
+import { BEHAVIOR, COLOR_PALETTE } from './charts-info.js';
 import { useTranslation } from 'react-i18next';
 import { Alert, Checkbox, Radio, Space } from 'antd';
 import Collapsible from '@educandu/educandu/components/collapsible.js';
@@ -22,14 +22,10 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, RadialLinearScale, BarElement, LineElement, PointElement, ArcElement, Title, Tooltip, Legend);
 
-const COLORS = [
-  'rgba(54, 162, 235, 0.8)',
-  'rgba(255, 99, 132, 0.8)',
-  'rgba(75, 192, 192, 0.8)',
-  'rgba(255, 206, 86, 0.8)',
-  'rgba(153, 102, 255, 0.8)',
-  'rgba(255, 159, 64, 0.8)'
-];
+const PALETTES = {
+  [COLOR_PALETTE.tableau]: ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f', '#edc948', '#b07aa1', '#ff9da7'],
+  [COLOR_PALETTE.set2]:    ['#66c2a5', '#fc8d62', '#8da0cb', '#e78ac3', '#a6d854', '#ffd92f', '#e5c494', '#b3b3b3']
+};
 
 const PIE_LIKE_TYPES = new Set(['pie', 'doughnut', 'polarArea']);
 
@@ -43,7 +39,8 @@ const CHART_COMPONENT = {
   polarArea: PolarArea
 };
 
-function buildChartJsData(chartData, chartType) {
+function buildChartJsData(chartData, chartType, colorPalette) {
+  const colors = PALETTES[colorPalette] ?? PALETTES[COLOR_PALETTE.tableau];
   const isPieLike = PIE_LIKE_TYPES.has(chartType);
 
   return {
@@ -52,11 +49,11 @@ function buildChartJsData(chartData, chartType) {
       label: ds.label,
       data: ds.data,
       backgroundColor: isPieLike
-        ? chartData.labels.map((_, j) => COLORS[j % COLORS.length])
-        : COLORS[i % COLORS.length],
+        ? chartData.labels.map((_, j) => `${colors[j % colors.length]}cc`)
+        : `${colors[i % colors.length]}cc`,
       borderColor: isPieLike
-        ? chartData.labels.map((_, j) => COLORS[j % COLORS.length].replace('0.8', '1'))
-        : COLORS[i % COLORS.length].replace('0.8', '1'),
+        ? chartData.labels.map((_, j) => colors[j % colors.length])
+        : colors[i % colors.length],
       borderWidth: 1
     }))
   };
@@ -96,7 +93,11 @@ function VotingForm({ content, input, canModifyInput, onInputChanged }) {
   const isOwner = user?._id && user._id === content.ownerUserId;
   const ownerExcluded = isOwner && content.ownerVotes === false;
 
-  const [localVotes, setLocalVotes] = useState({});
+  const [localVotes, setLocalVotes] = useState(savedData);
+
+  if (content.isLocked) {
+    return <Alert type="info" showIcon message={t('votingWasClosed')} />;
+  }
 
   // Nach educandus "Eingabe einreichen": canModifyInput wird false + input hat echte Serverdaten
   if (!canModifyInput && hasVoteData) {
@@ -140,12 +141,14 @@ function VotingForm({ content, input, canModifyInput, onInputChanged }) {
   }
 
   const handleVote = (questionKey, optionKey) => {
+    if (content.isLocked) { return; }
     const newVotes = { ...localVotes, [questionKey]: optionKey };
     setLocalVotes(newVotes);
     onInputChanged({ [content.votingId]: newVotes });
   };
 
   const handleCheckboxVote = (questionKey, checkedValues) => {
+    if (content.isLocked) { return; }
     const newVotes = { ...localVotes, [questionKey]: checkedValues };
     setLocalVotes(newVotes);
     onInputChanged({ [content.votingId]: newVotes });
@@ -222,6 +225,7 @@ export default function ChartsDisplay({ content, input, canModifyInput, onInputC
     const hasVoteData = typeof voteData === 'object' && voteData !== null && Object.keys(voteData).length > 0;
 
     if (content.isLocked && content.results) {
+      const colors = PALETTES[content.colorPalette] ?? PALETTES[COLOR_PALETTE.tableau];
       const multipleQuestions = content.questions.length > 1;
       const maxOptions = content.questions.reduce((acc, q) => Math.max(acc, q.options.length), 1);
       const barThickness = Math.max(20, Math.min(80, Math.floor(300 / maxOptions)));
@@ -238,8 +242,8 @@ export default function ChartsDisplay({ content, input, canModifyInput, onInputC
               datasets: [{
                 label: question.text,
                 data: question.options.map(o => questionResults[o.key] || 0),
-                backgroundColor: question.options.map((_, j) => COLORS[j % COLORS.length]),
-                borderColor: question.options.map((_, j) => COLORS[j % COLORS.length].replace('0.8', '1')),
+                backgroundColor: question.options.map((_, j) => `${colors[j % colors.length]}cc`),
+                borderColor: question.options.map((_, j) => colors[j % colors.length]),
                 borderWidth: 1,
                 barThickness
               }]
@@ -305,7 +309,7 @@ export default function ChartsDisplay({ content, input, canModifyInput, onInputC
   const useCollapsible = hasTitle || effectiveBehavior !== BEHAVIOR.static;
 
   const chartContent = hasData
-    ? <ChartComponent data={buildChartJsData(chartData, chartType)} options={options} />
+    ? <ChartComponent data={buildChartJsData(chartData, chartType, content.colorPalette)} options={options} />
     : <div className="EP_Musikisum_Charts_Display-empty">{t('noData')}</div>;
 
   return (

@@ -25,6 +25,11 @@ export const AXIS_CHART_TYPES = new Set([
   'bar', 'barHorizontal', 'line', 'radar', 'polarArea'
 ]);
 
+export const COLOR_PALETTE = {
+  tableau: 'tableau',
+  set2: 'set2'
+};
+
 const chartSchema = joi.object({
   mode: joi.string().valid('chart').required(),
   behavior: joi.string().valid(...Object.values(BEHAVIOR)).optional(),
@@ -33,6 +38,7 @@ const chartSchema = joi.object({
   chartType: joi.string().valid(...Object.values(CHART_TYPE)).required(),
   axisMin: joi.number().allow(null).optional(),
   axisMax: joi.number().allow(null).optional(),
+  colorPalette: joi.string().valid(...Object.values(COLOR_PALETTE)).optional(),
   chartData: joi.object({
     labels: joi.array().items(joi.string().allow('')).required(),
     datasets: joi.array().items(joi.object({
@@ -117,6 +123,7 @@ class ChartsInfo {
       chartType: CHART_TYPE.bar,
       axisMin: null,
       axisMax: null,
+      colorPalette: COLOR_PALETTE.tableau,
       chartData: {
         labels: [],
         datasets: []

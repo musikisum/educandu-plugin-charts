@@ -21,7 +21,15 @@ Es wird unter dem npm-Scope `@musikisum` veröffentlicht.
 - Basis-Struktur läuft (yarn, Docker, gulp serve funktionieren)
 - **chart-Mode vollständig implementiert** (siehe unten)
 - **voting-Mode vollständig implementiert** (siehe unten)
-- Auf npm veröffentlicht als `v1.0.0`
+- Auf npm veröffentlicht als `v1.1.0`
+
+**Änderungen seit v1.0.0:**
+- Farbpaletten-Toggle (Tableau 10 / ColorBrewer Set2) im chart-Mode-Editor
+- Voting: Votes nach Page-Refresh aus `input` wiederhergestellt (`useState(savedData)`)
+- Voting: Guard gegen falsches grünes Feedback nach Sperrung (`content.isLocked`-Check in `VotingForm`)
+- Voting: `isLocked`-Guard in Vote-Handlern verhindert Interaktion im Timing-Fenster
+- Text-Upload (@@-Format) für chart-Mode (`parseChartText`)
+- Editor: "Abstimmung"-Button korrekt deaktiviert wenn Abstimmung gesperrt ist
 
 ## Schlüsseldateien
 
