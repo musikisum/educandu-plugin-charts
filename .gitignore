@@ -3,3 +3,4 @@
 /dist/**
 /test-app/dist/**
 .DS_Store
+.claude/
