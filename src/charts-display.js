@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BEHAVIOR, COLOR_PALETTE } from './charts-info.js';
 import { useTranslation } from 'react-i18next';
 import { Alert, Checkbox, Radio, Space } from 'antd';
@@ -94,6 +94,13 @@ function VotingForm({ content, input, canModifyInput, onInputChanged }) {
   const ownerExcluded = isOwner && content.ownerVotes === false;
 
   const [localVotes, setLocalVotes] = useState(savedData);
+
+  useEffect(() => {
+    const votes = input?.data?.[content.votingId];
+    if (votes && typeof votes === 'object') {
+      setLocalVotes(votes);
+    }
+  }, [input, content.votingId]);
 
   if (content.isLocked) {
     return <Alert type="info" showIcon message={t('votingWasClosed')} />;
