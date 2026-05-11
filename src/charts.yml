@@ -56,6 +56,12 @@ musikisum/educandu-plugin-charts:
   dataFile:
     en: Data file
     de: Datei
+  dataFileInfoSpreadsheet:
+    en: "Spreadsheet (xlsx, ods, csv): row 1 — cell A1 empty, then dataset names (Y axis). From row 2: first column = X-axis labels, further columns = Y values."
+    de: "Tabellendatei (xlsx, ods, csv): Zeile 1 — Zelle A1 leer, dann Dataset-Namen (Y-Achse). Ab Zeile 2: erste Spalte = X-Achsen-Labels, weitere Spalten = Y-Werte."
+  dataFileInfoText:
+    en: "Text file (txt): @@Label = X-axis label (starts a group), one Y value per line below."
+    de: "Textdatei (txt): @@Label = X-Achsen-Label (beginnt eine Gruppe), darunter ein Y-Wert pro Zeile."
   chooseFile:
     en: Choose file (.xlsx, .ods, .csv, .txt)
     de: Datei wählen (.xlsx, .ods, .csv, .txt)

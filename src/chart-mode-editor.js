@@ -65,6 +65,14 @@ export default function ChartModeEditor({ content, onContentChanged }) {
   const showAxisControls = AXIS_CHART_TYPES.has(chartType);
   const dataRange = showAxisControls ? getDataRange(chartData) : null;
   const axisRangeInvalid = axisMin !== null && axisMax !== null && axisMin >= axisMax;
+  const dataFileTooltip = (
+    <span>
+      {t('dataFileInfoSpreadsheet')}
+      <br />
+      <br />
+      {t('dataFileInfoText')}
+    </span>
+  );
 
   return (
     <React.Fragment>
@@ -75,7 +83,7 @@ export default function ChartModeEditor({ content, onContentChanged }) {
           ))}
         </Select>
       </Form.Item>
-      <Form.Item label={t('dataFile')} {...FORM_ITEM_LAYOUT}>
+      <Form.Item label={<Info tooltip={dataFileTooltip}>{t('dataFile')}</Info>} {...FORM_ITEM_LAYOUT}>
         <Space direction="vertical" style={{ width: '100%' }}>
           <Upload accept=".xlsx,.xls,.ods,.csv,.txt" showUploadList={false} beforeUpload={handleFileUpload}>
             <Button icon={<UploadOutlined />}>{t('chooseFile')}</Button>
