@@ -122,7 +122,7 @@ export default function ChartsDisplay({ content, input, canModifyInput, onInputC
                 <Bar
                   data={chartData}
                   options={{ ...buildOptions('bar', content.axisMin ?? null, content.axisMax ?? null), plugins: { legend: { display: !multipleQuestions } } }}
-                />
+                  />
               </div>
             );
           })}
@@ -138,7 +138,7 @@ export default function ChartsDisplay({ content, input, canModifyInput, onInputC
                   title={content.title || null}
                   isCollapsible={behavior !== BEHAVIOR.static}
                   isCollapsed={behavior === BEHAVIOR.expandable}
-                >
+                  >
                   {lockedContent}
                 </Collapsible>
               )
@@ -163,7 +163,7 @@ export default function ChartsDisplay({ content, input, canModifyInput, onInputC
           input={input}
           canModifyInput={canModifyInput}
           onInputChanged={onInputChanged}
-        />
+          />
       </div>
     );
   }
@@ -189,7 +189,7 @@ export default function ChartsDisplay({ content, input, canModifyInput, onInputC
               title={content.title || null}
               isCollapsible={effectiveBehavior !== BEHAVIOR.static}
               isCollapsed={effectiveBehavior === BEHAVIOR.expandable}
-            >
+              >
               {chartContent}
             </Collapsible>
           )

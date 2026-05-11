@@ -158,14 +158,14 @@ export default function VotingForm({ content, input, canModifyInput, onInputChan
                 <Checkbox.Group
                   value={currentValues}
                   onChange={values => handleCheckboxVote(question.key, values)}
-                >
+                  >
                   <Space direction="vertical">
                     {question.options.map(option => (
                       <Checkbox
                         key={option.key}
                         value={option.key}
                         disabled={maxReached ? !currentValues.includes(option.key) : null}
-                      >
+                        >
                         {option.text}
                       </Checkbox>
                     ))}
@@ -176,7 +176,7 @@ export default function VotingForm({ content, input, canModifyInput, onInputChan
                 <Radio.Group
                   value={localVotes[question.key] || null}
                   onChange={e => handleVote(question.key, e.target.value)}
-                >
+                  >
                   <Space direction="vertical">
                     {question.options.map(option => (
                       <Radio key={option.key} value={option.key}>{option.text}</Radio>

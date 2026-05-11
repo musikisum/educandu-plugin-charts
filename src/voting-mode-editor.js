@@ -117,7 +117,7 @@ export default function VotingModeEditor({ content, context, onContentChanged })
         <Radio.Group
           value={content.ownerVotes}
           onChange={e => updateContent({ ownerVotes: e.target.value })}
-        >
+          >
           <Radio.Button value>{t('ownerVotesYes')}</Radio.Button>
           <Radio.Button value={false}>{t('ownerVotesNo')}</Radio.Button>
         </Radio.Group>
@@ -149,7 +149,7 @@ export default function VotingModeEditor({ content, context, onContentChanged })
                     value={isMultiple}
                     onChange={e => updateQuestion(question.key, { multipleChoice: e.target.value, maxSelections: null })}
                     style={{ flexShrink: 0 }}
-                  >
+                    >
                     <Radio.Button value={false}>{t('votingSingleChoice')}</Radio.Button>
                     <Radio.Button value>{t('votingMultipleChoice')}</Radio.Button>
                   </Radio.Group>
@@ -163,7 +163,7 @@ export default function VotingModeEditor({ content, context, onContentChanged })
                       onChange={v => updateQuestion(question.key, { maxSelections: v ?? null })}
                       placeholder={t('votingNoLimit')}
                       style={{ width: 90 }}
-                    />
+                      />
                   </div>
                 </div>
               );
