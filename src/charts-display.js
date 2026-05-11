@@ -118,6 +118,16 @@ function VotingForm({ content, input, canModifyInput, onInputChanged }) {
     }
   }, [storageKey]);
 
+  useEffect(() => {
+    if (!storageKey) { return; }
+    if (!content.isLocked && canModifyInput) { return; }
+    try {
+      window.localStorage.removeItem(storageKey);
+    } catch {
+      // storage unavailable
+    }
+  }, [content.isLocked, canModifyInput, storageKey]);
+
   if (content.isLocked) {
     return <Alert type="info" showIcon message={t('votingWasClosed')} />;
   }
