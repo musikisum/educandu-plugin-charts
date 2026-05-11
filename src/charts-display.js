@@ -92,15 +92,31 @@ function VotingForm({ content, input, canModifyInput, onInputChanged }) {
   const hasVoteData = Object.keys(savedData).length > 0;
   const isOwner = user?._id && user._id === content.ownerUserId;
   const ownerExcluded = isOwner && content.ownerVotes === false;
+  const storageKey = user?._id ? `ep-charts-vote-${user._id}-${content.votingId}` : null;
 
   const [localVotes, setLocalVotes] = useState(savedData);
 
   useEffect(() => {
     const votes = input?.data?.[content.votingId];
-    if (votes && typeof votes === 'object') {
+    if (votes && typeof votes === 'object' && Object.keys(votes).length > 0) {
       setLocalVotes(votes);
     }
   }, [input, content.votingId]);
+
+  useEffect(() => {
+    if (!storageKey) { return; }
+    try {
+      const stored = window.localStorage.getItem(storageKey);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+          setLocalVotes(prev => Object.keys(prev).length > 0 ? prev : parsed);
+        }
+      }
+    } catch {
+      // storage unavailable
+    }
+  }, [storageKey]);
 
   if (content.isLocked) {
     return <Alert type="info" showIcon message={t('votingWasClosed')} />;
@@ -152,6 +168,13 @@ function VotingForm({ content, input, canModifyInput, onInputChanged }) {
     const newVotes = { ...localVotes, [questionKey]: optionKey };
     setLocalVotes(newVotes);
     onInputChanged({ [content.votingId]: newVotes });
+    if (storageKey) {
+      try {
+        window.localStorage.setItem(storageKey, JSON.stringify(newVotes));
+      } catch {
+        // storage unavailable
+      }
+    }
   };
 
   const handleCheckboxVote = (questionKey, checkedValues) => {
@@ -159,6 +182,13 @@ function VotingForm({ content, input, canModifyInput, onInputChanged }) {
     const newVotes = { ...localVotes, [questionKey]: checkedValues };
     setLocalVotes(newVotes);
     onInputChanged({ [content.votingId]: newVotes });
+    if (storageKey) {
+      try {
+        window.localStorage.setItem(storageKey, JSON.stringify(newVotes));
+      } catch {
+        // storage unavailable
+      }
+    }
   };
 
   return (
