@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BEHAVIOR } from './charts-info.js';
+import { BEHAVIOR, COLOR_PALETTE } from './charts-info.js';
 import { useTranslation } from 'react-i18next';
 import { UploadOutlined } from '@ant-design/icons';
 import Info from '@educandu/educandu/components/info.js';
@@ -110,9 +110,44 @@ export default function VotingModeEditor({ content, context, onContentChanged })
   };
 
   if (content.isLocked) {
+    const axisMin = content.axisMin ?? null;
+    const axisMax = content.axisMax ?? null;
+    const axisRangeInvalid = axisMin !== null && axisMax !== null && axisMin >= axisMax;
     return (
       <React.Fragment>
         <Alert type="info" showIcon message={t('votingLockedHint')} style={{ marginBottom: 16 }} />
+        <Form.Item label={t('colorPalette')} {...FORM_ITEM_LAYOUT}>
+          <Radio.Group
+            value={content.colorPalette ?? COLOR_PALETTE.tableau}
+            onChange={e => updateContent({ colorPalette: e.target.value })}
+            >
+            <Radio.Button value={COLOR_PALETTE.tableau}>{t('colorPaletteTableau')}</Radio.Button>
+            <Radio.Button value={COLOR_PALETTE.set2}>{t('colorPaletteSet2')}</Radio.Button>
+          </Radio.Group>
+        </Form.Item>
+        <Form.Item
+          label={t('valueAxis')}
+          {...FORM_ITEM_LAYOUT}
+          validateStatus={axisRangeInvalid ? 'error' : ''}
+          help={axisRangeInvalid ? t('axisRangeError') : null}
+          >
+          <Space align="center">
+            <span>{t('min')}:</span>
+            <InputNumber
+              placeholder={t('auto')}
+              value={axisMin}
+              onChange={v => updateContent({ axisMin: v })}
+              style={{ width: 90 }}
+              />
+            <span>{t('max')}:</span>
+            <InputNumber
+              placeholder={t('auto')}
+              value={axisMax}
+              onChange={v => updateContent({ axisMax: v })}
+              style={{ width: 90 }}
+              />
+          </Space>
+        </Form.Item>
         <Form.Item label={t('behavior')} {...FORM_ITEM_LAYOUT}>
           <Radio.Group
             value={content.behavior ?? BEHAVIOR.static}

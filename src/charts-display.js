@@ -93,47 +93,69 @@ function VotingForm({ content, input, canModifyInput, onInputChanged }) {
   const isOwner = user?._id && user._id === content.ownerUserId;
   const ownerExcluded = isOwner && content.ownerVotes === false;
   const storageKey = user?._id ? `ep-charts-vote-${user._id}-${content.votingId}` : null;
+  const submittedFlagKey = user?._id ? `ep-charts-submitted-${user._id}-${content.votingId}` : null;
 
   const [localVotes, setLocalVotes] = useState(savedData);
+  const [hasBeenSubmitted, setHasBeenSubmitted] = useState(() => {
+    if (!submittedFlagKey) { return false; }
+    try {
+      return !!window.sessionStorage.getItem(submittedFlagKey);
+    } catch {
+      return false;
+    }
+  });
 
   useEffect(() => {
     const votes = input?.data?.[content.votingId];
     if (votes && typeof votes === 'object' && Object.keys(votes).length > 0) {
       setLocalVotes(votes);
+      return;
     }
-  }, [input, content.votingId]);
-
-  useEffect(() => {
-    if (!storageKey) { return; }
+    if (!storageKey || !canModifyInput || hasBeenSubmitted) { return; }
     try {
       const stored = window.localStorage.getItem(storageKey);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
-          setLocalVotes(prev => Object.keys(prev).length > 0 ? prev : parsed);
+          setLocalVotes(parsed);
+          if (onInputChanged) {
+            onInputChanged({ [content.votingId]: parsed });
+          }
         }
       }
     } catch {
       // storage unavailable
     }
-  }, [storageKey]);
+  }, [input, content.votingId, storageKey, onInputChanged, canModifyInput, hasBeenSubmitted]);
 
   useEffect(() => {
     if (!storageKey) { return; }
-    if (!content.isLocked && canModifyInput) { return; }
+    if (!content.isLocked && canModifyInput && !hasBeenSubmitted) { return; }
     try {
       window.localStorage.removeItem(storageKey);
     } catch {
       // storage unavailable
     }
-  }, [content.isLocked, canModifyInput, storageKey]);
+  }, [content.isLocked, canModifyInput, storageKey, hasBeenSubmitted]);
+
+  useEffect(() => {
+    if (hasBeenSubmitted || !submittedFlagKey) { return; }
+    if (!canModifyInput && hasVoteData) {
+      setHasBeenSubmitted(true);
+      try {
+        window.sessionStorage.setItem(submittedFlagKey, '1');
+      } catch {
+        // storage unavailable
+      }
+    }
+  }, [canModifyInput, hasVoteData, submittedFlagKey, hasBeenSubmitted]);
 
   if (content.isLocked) {
     return <Alert type="info" showIcon message={t('votingWasClosed')} />;
   }
 
-  // Nach educandus "Eingabe einreichen": canModifyInput wird false + input hat echte Serverdaten
-  if (!canModifyInput && hasVoteData) {
+  if (hasBeenSubmitted || (!canModifyInput && hasVoteData)) {
+    const displayData = hasVoteData ? savedData : localVotes;
     return (
       <Space direction="vertical" style={{ width: '100%' }} size="large">
         <Alert type="success" showIcon message={t('votingSubmittedHint')} />
@@ -142,7 +164,7 @@ function VotingForm({ content, input, canModifyInput, onInputChanged }) {
             <div className="EP_Musikisum_Charts_Display-questionText">{question.text}</div>
             {question.multipleChoice ?? false
               ? (
-                <Checkbox.Group value={savedData[question.key] || []} disabled>
+                <Checkbox.Group value={displayData[question.key] || []} disabled>
                   <Space direction="vertical">
                     {question.options.map(option => (
                       <Checkbox key={option.key} value={option.key}>{option.text}</Checkbox>
@@ -151,7 +173,7 @@ function VotingForm({ content, input, canModifyInput, onInputChanged }) {
                 </Checkbox.Group>
               )
               : (
-                <Radio.Group value={savedData[question.key] || null} disabled>
+                <Radio.Group value={displayData[question.key] || null} disabled>
                   <Space direction="vertical">
                     {question.options.map(option => (
                       <Radio key={option.key} value={option.key}>{option.text}</Radio>
@@ -300,7 +322,7 @@ export default function ChartsDisplay({ content, input, canModifyInput, onInputC
                 {multipleQuestions ? <div className="EP_Musikisum_Charts_Display-questionText">{question.text}</div> : null}
                 <Bar
                   data={chartData}
-                  options={{ plugins: { legend: { display: !multipleQuestions } } }}
+                  options={{ ...buildOptions('bar', content.axisMin ?? null, content.axisMax ?? null), plugins: { legend: { display: !multipleQuestions } } }}
                   />
               </div>
             );

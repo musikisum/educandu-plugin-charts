@@ -21,15 +21,16 @@ Es wird unter dem npm-Scope `@musikisum` veröffentlicht.
 - Basis-Struktur läuft (yarn, Docker, gulp serve funktionieren)
 - **chart-Mode vollständig implementiert** (siehe unten)
 - **voting-Mode vollständig implementiert** (siehe unten)
-- Auf npm veröffentlicht als `v1.1.0`
+- Auf npm veröffentlicht als `v1.1.0`; nächste Version `v1.2.0` in Arbeit (noch kein Tag/npm-Push)
 
-**Änderungen seit v1.0.0:**
-- Farbpaletten-Toggle (Tableau 10 / ColorBrewer Set2) im chart-Mode-Editor
-- Voting: Votes nach Page-Refresh aus `input` wiederhergestellt (`useState(savedData)`)
-- Voting: Guard gegen falsches grünes Feedback nach Sperrung (`content.isLocked`-Check in `VotingForm`)
-- Voting: `isLocked`-Guard in Vote-Handlern verhindert Interaktion im Timing-Fenster
-- Text-Upload (@@-Format) für chart-Mode (`parseChartText`)
-- Editor: "Abstimmung"-Button korrekt deaktiviert wenn Abstimmung gesperrt ist
+**Änderungen seit v1.1.0 (für v1.2.0):**
+- Voting: localStorage-Persistenz für Votes (`ep-charts-vote-userId-votingId`) — überlebt Browser-Refresh vor Einreichen
+- Voting: Submit-Button nach Refresh reaktiviert (localStorage-Restore ruft `onInputChanged` auf)
+- Voting: `hasBeenSubmitted`-Flag in sessionStorage (`ep-charts-submitted-userId-votingId`) — verhindert Neuabstimmung wenn educandus `canModifyInput` zurückgesetzt wird
+- Voting: Bestätigungstext nach Einreichen präzisiert ("kann nicht mehr geändert werden")
+- Voting: Farbpalette und Werteachse (Min/Max) auch im gesperrten Editor editierbar
+- chart-Mode-Editor: Hilfe-Tooltip beim Datei-Upload mit Format-Erklärung
+- `votingSchema` um `colorPalette`, `axisMin`, `axisMax` erweitert (alle `.optional()`)
 
 ## Schlüsseldateien
 
@@ -120,6 +121,10 @@ kein CDN-Upload, keine URL gespeichert. Die geparsten Daten landen direkt im Con
 ```js
 {
   mode: 'voting',
+
+  colorPalette: 'tableau',  // 'tableau' | 'set2' — wirkt auf Ergebnis-Chart nach Sperren
+  axisMin: null,            // null = Auto; wirkt auf Ergebnis-Chart nach Sperren
+  axisMax: null,            // null = Auto; Constraint: axisMin < axisMax wenn beide gesetzt
 
   questions: [              // beliebig viele Fragen pro Plugin-Instanz
     {
@@ -347,14 +352,25 @@ locked voting, öffentlicher Bereich). Aktive Abstimmung im Raum behält den Rah
 ```js
 const votingSchema = joi.object({
   mode: joi.string().valid('voting').required(),
+  behavior: joi.string().valid(...Object.values(BEHAVIOR)).optional(),
+  title: joi.string().allow('').optional(),
+  width: joi.number().min(0).max(100).optional(),
+  colorPalette: joi.string().valid(...Object.values(COLOR_PALETTE)).optional(),
+  axisMin: joi.number().allow(null).optional(),
+  axisMax: joi.number().allow(null).optional(),
+  votingId: joi.string().required(),
+  ownerUserId: joi.string().allow(null).optional(),
+  ownerVotes: joi.boolean().optional(),
   questions: joi.array().items(joi.object({
     key: joi.string().required(),
     text: joi.string().allow('').required(),
+    multipleChoice: joi.boolean().optional(),
+    maxSelections: joi.number().integer().min(2).allow(null).optional(),
     options: joi.array().items(joi.object({
       key: joi.string().required(),
       text: joi.string().allow('').required()
-    })).min(2).required()
-  })).min(1).required(),
+    })).min(1).required()
+  })).required(),
   isLocked: joi.boolean().required(),
   results: joi.object().allow(null).required()
 });
@@ -468,7 +484,10 @@ Das `input`-Objekt hat immer die Struktur `{ data: {...}, files: [...] }`.
    - `resources`: `translations.json` Pfad hinzufügen
    - Kein Controller-Eintrag nötig (voting läuft über documentInput-System)
 
-3. **Veröffentlichung** — `git tag vX.Y.Z && git push origin vX.Y.Z`
-   (Tag-Push triggert GitHub Actions → baut → publiziert auf npm automatisch)
+3. **Refactoring `charts-display.js`** — Datei hat ~430 Zeilen; `VotingForm` und `ChartsDisplay`
+   in separate Dateien aufteilen (`voting-form.js` + `voting-results.js` o.ä.)
 
-4. **Testen** — Abstimmung mit anonymen Benutzern noch nicht getestet
+4. **Veröffentlichung v1.2.0** — nach erfolgreichem Testen:
+   `git tag v1.2.0 && git push origin v1.2.0`
+
+5. **Testen** — Abstimmung mit anonymen Benutzern noch nicht getestet

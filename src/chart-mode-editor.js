@@ -9,6 +9,10 @@ import { sectionEditorProps } from '@educandu/educandu/ui/default-prop-types.js'
 import ObjectWidthSlider from '@educandu/educandu/components/object-width-slider.js';
 import { parseChartWorkbook, parseChartText, readFile, getDataRange, MAX_UPLOAD_BYTES } from './charts-utils.js';
 
+const renderLines = text => text.split('\n').map((line, i, arr) => (
+  <React.Fragment key={i}>{line}{i < arr.length - 1 ? <br /> : null}</React.Fragment>
+));
+
 const CHART_TYPE_OPTIONS = [
   { value: CHART_TYPE.bar, labelKey: 'chartTypeBar' },
   { value: CHART_TYPE.barHorizontal, labelKey: 'chartTypeBarHorizontal' },
@@ -67,10 +71,9 @@ export default function ChartModeEditor({ content, onContentChanged }) {
   const axisRangeInvalid = axisMin !== null && axisMax !== null && axisMin >= axisMax;
   const dataFileTooltip = (
     <span>
-      {t('dataFileInfoSpreadsheet')}
+      {renderLines(t('dataFileInfoSpreadsheet'))}
       <br />
-      <br />
-      {t('dataFileInfoText')}
+      {renderLines(t('dataFileInfoText'))}
     </span>
   );
 

@@ -71,6 +71,9 @@ const votingSchema = joi.object({
       text: joi.string().allow('').required()
     })).min(1).required()
   })).required(),
+  colorPalette: joi.string().valid(...Object.values(COLOR_PALETTE)).optional(),
+  axisMin: joi.number().allow(null).optional(),
+  axisMax: joi.number().allow(null).optional(),
   isLocked: joi.boolean().required(),
   results: joi.object().allow(null).required()
 });
@@ -84,6 +87,9 @@ export function createDefaultVotingContent(ownerUserId = null) {
     votingId: uniqueId.create(),
     ownerUserId,
     ownerVotes: true,
+    colorPalette: COLOR_PALETTE.tableau,
+    axisMin: null,
+    axisMax: null,
     questions: [],
     isLocked: false,
     results: null
